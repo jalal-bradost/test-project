@@ -1,0 +1,141 @@
+#-------------------------------------------------------------------------------#
+#               Qodana analysis is configured by qodana.yaml file               #
+#             https://www.jetbrains.com/help/qodana/qodana-yaml.html            #
+#-------------------------------------------------------------------------------#
+version: "1.0"
+#Specify inspection profile for code analysis
+profile:
+  name: qodana.starter
+#Enable inspections
+#include:
+#  - name: <SomeEnabledInspectionId>
+#Disable inspections
+#exclude:
+#  - name: <SomeDisabledInspectionId>
+#    paths:
+#      - <path/where/not/run/inspection>
+#Execute shell command before Qodana execution (Applied in CI/CD pipeline)
+#bootstrap: sh ./prepare-qodana.sh
+#Install IDE plugins before Qodana execution (Applied in CI/CD pipeline)
+#plugins:
+#  - id: <plugin.id> #(plugin id can be found at https://plugins.jetbrains.com)
+#Specify Qodana linter for analysis (Applied in CI/CD pipeline)
+linter: jetbrains/qodana-js:2023.2
+include:
+  - name: JsCoverageInspection
+  - name: StandardJS
+  - name: TailRecursionJS
+  - name: PlatformDetectionJS
+  - name: XHTMLIncompatabilitiesJS
+  - name: InnerHTMLJS
+  - name: ES6ConvertToForOf
+  - name: JSFunctionExpressionToArrowFunction
+  - name: ES6ConvertIndexedForToForOf
+  - name: JSStringConcatenationToES6Template
+  - name: FlowJSCoverage
+  - name: FlowJSConfig
+  - name: JSUndeclaredVariable
+  - name: JSAnnotator
+  - name: JSAccessibilityCheck
+  - name: JSXSyntaxUsed
+  - name: JSUnresolvedLibraryURL
+  - name: JSNonStrictModeUsed
+  - name: JSCheckFunctionSignatures
+  - name: JSLastCommaInArrayLiteral
+  - name: JSLastCommaInObjectLiteral
+  - name: JSFileReferences
+  - name: JSUnresolvedReference
+  - name: CheckValidXmlInScriptTagBody
+  - name: NpmUsedModulesInstalled
+  - name: JSUrlImportUsage
+  - name: StringLiteralBreaksHTMLJS
+  - name: ReservedWordUsedAsNameJS
+  - name: ThisExpressionReferencesGlobalObjectJS
+  - name: SuspiciousAsDynamic
+  - name: RegExpRedundantEscape
+  - name: ES6BindWithArrowFunction
+  - name: DebuggerStatementJS
+  - name: CallerJS
+  - name: NestedFunctionJS
+  - name: BlockStatementJS
+  - name: DynamicallyGeneratedCodeJS
+  - name: ConfusingPlusesOrMinusesJS
+  - name: CheckDependencyLicenses
+  - name: JSDeclarationsAtScopeStart
+  - name: ChainedEqualityJS
+  - name: JSArrowFunctionBracesCanBeRemoved
+  - name: ReplaceAssignmentWithOperatorAssignmentJS
+  - name: AssignmentToForLoopParameterJS
+  - name: AssignmentToFunctionParameterJS
+  - name: NestedAssignmentJS
+  - name: AssignmentResultUsedJS
+  - name: PointlessBitwiseExpressionJS
+  - name: NonBlockStatementBodyJS
+  - name: JSUndefinedPropertyAssignment
+  - name: JSRemoveUnnecessaryParentheses
+  - name: ForLoopReplaceableByWhileJS
+  - name: IfStatementWithIdenticalBranchesJS
+  - name: IfStatementWithTooManyBranchesJS
+  - name: ConditionalExpressionWithIdenticalBranchesJS
+  - name: DuplicateConditionJS
+  - name: TrivialIfJS
+  - name: TrivialConditionalJS
+  - name: UnnecessaryLocalVariableJS
+  - name: ReuseOfLocalVariableJS
+  - name: DocumentWriteJS
+  - name: EditorConfigShadowedOption
+  - name: EditorConfigShadowingOption
+  - name: EjsUnresolvedInclude
+  - name: FunctionWithMultipleLoopsJS
+  - name: ThreeNegationsPerFunctionJS
+  - name: FunctionWithMultipleReturnPointsJS
+  - name: ParametersPerFunctionJS
+  - name: CyclomaticComplexityJS
+  - name: StatementsPerFunctionJS
+  - name: NestingDepthJS
+  - name: JSMethodCanBeStatic
+  - name: JSJoinVariableDeclarationAndAssignment
+  - name: UpdateDependencyToLatestVersion
+  - name: JsonSchemaCompliance
+  - name: JsonStandardCompliance
+  - name: Json5StandardCompliance
+  - name: JsonSchemaDeprecation
+  - name: JsonDuplicatePropertyKeys
+  - name: JsonSchemaRefReference
+  - name: JSClassNamingConvention
+  - name: FunctionNamingConventionJS
+  - name: ParameterNamingConventionJS
+  - name: LocalVariableNamingConventionJS
+  - name: ConfusingFloatingPointLiteralJS
+  - name: NegatedIfStatementJS
+  - name: NegatedConditionalExpressionJS
+  - name: NestedConditionalExpressionJS
+  - name: OverlyComplexArithmeticExpressionJS
+  - name: OverlyComplexBooleanExpressionJS
+  - name: PointlessArithmeticExpressionJS
+  - name: IncrementDecrementResultUsedJS
+  - name: EmptyStatementBodyJS
+  - name: FunctionWithInconsistentReturnsJS
+  - name: BreakStatementJS
+  - name: BreakStatementWithLabelJS
+  - name: ContinueStatementJS
+  - name: ContinueStatementWithLabelJS
+  - name: VoidExpressionJS
+  - name: AnonymousFunctionJS
+  - name: ConditionalExpressionJS
+  - name: LabeledStatementJS
+  - name: ForLoopThatDoesntUseLoopVariableJS
+  - name: JSConstructorReturnsPrimitive
+  - name: DivideByZeroJS
+  - name: ObjectAllocationIgnoredJS
+  - name: DefaultNotLastCaseInSwitchJS
+  - name: JSMissingSwitchBranches
+  - name: JSMissingSwitchDefault
+  - name: JSRedundantSwitchStatement
+  - name: NestedSwitchStatementJS
+  - name: TextLabelInSwitchStatementJS
+  - name: EmptyCatchBlockJS
+  - name: EmptyFinallyBlockJS
+  - name: EmptyTryBlockJS
+  - name: UnusedCatchParameterJS
+  - name: JSUnusedGlobalSymbols
