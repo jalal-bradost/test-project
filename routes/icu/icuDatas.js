@@ -82,7 +82,8 @@ const cleanItems = (items) => {
             size: item.product.size,
             image: item.product.image,
             barcode: item.product.barcode,
-            specialPriceUSD: item.product.specialPriceUSD
+            specialPriceUSD: item.product.specialPriceUSD,
+            perBox: item.product.perBox
         },
         quantity: item.quantity
     }));

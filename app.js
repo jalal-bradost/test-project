@@ -173,3 +173,7 @@ require("./routes-v1/scrubNurse/scrubNurseCaseItemRoutes")
 require("./routes/scrub-nurse/products")
 
 require("./routes/warehouse/stats")
+
+//crm routes
+require('./routes-v1/crm/first-stage/firstStageRoutes')
+require('./routes-v1/crm/doctors-stage/doctorStageRoutes')

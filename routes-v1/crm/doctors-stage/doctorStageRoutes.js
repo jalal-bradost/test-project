@@ -1,0 +1,25 @@
+const router = require("../../../config/express");
+const {
+  createDoctorStage,   // Updated controller function for creating a DoctorStage
+  getAllDoctorStages,  // Updated controller function for getting all DoctorStage records
+  getDoctorStageById,  // Updated controller function for getting a DoctorStage by ID
+  updateDoctorStage,   // Updated controller function for updating a DoctorStage record
+  deleteDoctorStage,   // Updated controller function for deleting a DoctorStage record
+} = require("../../../controllers/crm/doctor-stage/doctorStageController"); // Adjusted path to the new controller
+
+// Create a DoctorStage record (if patient does not exist, create the patient first)
+router.post('/crm/doctor-stage', createDoctorStage);
+
+// Get all DoctorStage records
+router.get('/crm/doctor-stage', getAllDoctorStages);
+
+// Get a single DoctorStage record by ID
+router.get("/crm/doctor-stage/:id", getDoctorStageById);
+
+// Update a DoctorStage record by ID
+router.put("/crm/doctor-stage", updateDoctorStage);
+
+// Delete a DoctorStage record by ID
+router.delete("/crm/doctor-stage/:id", deleteDoctorStage);
+
+module.exports = router;

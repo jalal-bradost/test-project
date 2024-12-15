@@ -10,9 +10,9 @@ const DB_SSL = process.env.DB_SSL === "true";
 // Set up the Sequelize instance and establish the connection
 const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
     host: DB_HOST, port: DB_PORT, dialectOptions: {
-        ssl: {
-            require: true, rejectUnauthorized: false
-        }
+        // ssl: {
+        //     require: true, rejectUnauthorized: false
+        // }
     }, logging: false, dialect: "postgres", pool: {
         max: 27, min: 0, acquire: 30000, idle: 10000
     }
@@ -152,6 +152,18 @@ const PicuTime = require("./picu_v1/PicuTime")(sequelize)
 
 const PerfusionCase = require("./perfusion_v1/PerfusionCase")(sequelize)
 const PerfusionCaseItem = require("./perfusion_v1/PerfusionCaseItem")(sequelize)
+
+//CRM
+const PatientCRM = require('./crm/PatientCRM')(sequelize)
+const FirstStage = require('./crm/FirstStage')(sequelize)
+const DoctorStage = require('./crm/DoctorStage')(sequelize)
+
+FirstStage.belongsTo(PatientCRM, { foreignKey: 'patientId' });
+PatientCRM.hasOne(FirstStage, { foreignKey: 'patientId' });
+
+DoctorStage.belongsTo(PatientCRM, { foreignKey: 'patientId' });
+PatientCRM.hasOne(DoctorStage, { foreignKey: 'patientId' });
+
 
 PerfusionCase.hasMany(PerfusionCaseItem, {
     foreignKey: 'perfusionCaseId', onDelete: 'CASCADE', as: "items"
@@ -1011,5 +1023,8 @@ module.exports = {
     EmployeeTaskNotificationLog,
     Meeting,
     MeetingParticipant,
-    MeetingIdea
+    MeetingIdea,
+    PatientCRM,
+    FirstStage,
+    DoctorStage
 };
