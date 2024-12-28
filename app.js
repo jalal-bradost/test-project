@@ -175,5 +175,16 @@ require("./routes/scrub-nurse/products")
 require("./routes/warehouse/stats")
 
 //crm routes
+require('./routes-v1/crm/patient/patientRoutes')
+require('./routes-v1/crm/patient/cityRoutes')
+require('./routes-v1/crm/patient/statusRoutes')
+require('./routes-v1/crm/patient/referTypeRoutes')
+require('./routes-v1/crm/patient/referNameRoutes')
+require('./routes-v1/crm/patient/addressRoutes')
+require('./routes-v1/crm/patient/professionRoutes')
+
 require('./routes-v1/crm/first-stage/firstStageRoutes')
 require('./routes-v1/crm/doctors-stage/doctorStageRoutes')
+require('./routes-v1/crm/appointment-stage/appointmentStageRoutes')
+require('./routes-v1/crm/clinic-stage/clinicStageRoutes')
+require('./routes-v1/crm/social-activity/socialActivityRoutes')

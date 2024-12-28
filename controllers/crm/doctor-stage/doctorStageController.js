@@ -4,30 +4,28 @@ module.exports = {
   // Create or use existing patient, then create DoctorStage
   createDoctorStage: async (req, res) => {
     try {
-      const { phoneNumber, fullname, birthdate, sex, bloodType, ...doctorStageData } = req.body;
-
-      // Validate or create patient
-      const [patient, created] = await PatientCRM.findOrCreate({
-        where: { phoneNumber: phoneNumber.trim() },
-        defaults: {
-          phoneNumber: phoneNumber.trim(),
-          fullname,
-          birthdate,
-          sex,
-          bloodType,
-        }, // Include all required fields for the PatientCRM
-      });
-
+      const { patientId, statusId, ...doctorStageData } = req.body;
+  
+      // Retrieve and update PatientCRM record
+      const patient = await PatientCRM.findByPk(patientId);
+      if (!patient) {
+        return res.status(404).json({
+          message: "Patient record not found. Unable to proceed with DoctorStage creation.",
+        });
+      }
+  
+      // Update the statusId of the PatientCRM record
+      await patient.update({ statusId });
+  
       // Create DoctorStage
       const doctorStage = await DoctorStage.create({
+        patientId,
         ...doctorStageData,
-        patientId: patient.patientId, // Link DoctorStage to the correct patient
       });
-
+  
       res.status(201).json({
-        message: "DoctorStage record created successfully",
+        message: "DoctorStage record created successfully and patient status updated.",
         doctorStage,
-        patient,
       });
     } catch (error) {
       console.error("Error in createDoctorStage:", error.message);
@@ -39,11 +37,24 @@ module.exports = {
   getAllDoctorStages: async (req, res) => {
     try {
       const doctorStages = await DoctorStage.findAll({
-        include: PatientCRM, // Include related PatientCRM records
+        include: {
+          model: PatientCRM,
+          attributes: ['patientId', 'fullname', 'phoneNumber'],  
+        },
       });
       res.status(200).json(doctorStages);
     } catch (error) {
       console.error(error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  getPatients: async(req,res) =>{
+    try {
+      const patients = await DoctorStage.getPatients();
+      res.status(200).json(patients);
+    } catch (error) {
+      console.log(error)
       res.status(500).json({ error: error.message });
     }
   },

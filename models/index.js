@@ -154,16 +154,37 @@ const PerfusionCase = require("./perfusion_v1/PerfusionCase")(sequelize)
 const PerfusionCaseItem = require("./perfusion_v1/PerfusionCaseItem")(sequelize)
 
 //CRM
-const PatientCRM = require('./crm/PatientCRM')(sequelize)
+const PatientCRM = require('./crm/patient/PatientCRM')(sequelize)
+const PatientCRMCity = require('./crm/patient/City')(sequelize)
+const PatientCRMAddress = require('./crm/patient/Address')(sequelize)
+const PatientCRMReferType = require('./crm/patient/ReferType')(sequelize)
+const PatientCRMReferName = require('./crm/patient/ReferName')(sequelize)
+const PatientCRMStatus = require('./crm/patient/Status')(sequelize)
+const PatientCRMProfession = require('./crm/patient/Proffession')(sequelize)
+
 const FirstStage = require('./crm/FirstStage')(sequelize)
 const DoctorStage = require('./crm/DoctorStage')(sequelize)
+const AppointmentStage = require('./crm/AppointmentStage')(sequelize)
+const ClinicStage = require('./crm/ClinicStage')(sequelize)
+const SocialActivity = require('./crm/SocialActivity')(sequelize)
+
+PatientCRM.belongsTo(PatientCRMCity, { foreignKey: "cityId", as: "city" });
+PatientCRM.belongsTo(PatientCRMAddress, { foreignKey: "addressId", as: "address" });
+PatientCRM.belongsTo(PatientCRMReferType, { foreignKey: "referTypeId", as: "refer_type" });
+PatientCRM.belongsTo(PatientCRMReferName, { foreignKey: "referNameId", as: "refer_name" });
+PatientCRM.belongsTo(PatientCRMStatus, { foreignKey: "statusId", as: "status" });
+PatientCRM.belongsTo(PatientCRMProfession, { foreignKey: "professionId", as: "profession" });
 
 FirstStage.belongsTo(PatientCRM, { foreignKey: 'patientId' });
-PatientCRM.hasOne(FirstStage, { foreignKey: 'patientId' });
 
 DoctorStage.belongsTo(PatientCRM, { foreignKey: 'patientId' });
-PatientCRM.hasOne(DoctorStage, { foreignKey: 'patientId' });
 
+AppointmentStage.belongsTo(PatientCRM, { foreignKey: 'patientId' });
+
+ClinicStage.belongsTo(PatientCRM, { foreignKey: 'patientId' });
+
+SocialActivity.belongsTo(User,{foreignKey:'createdBy'});
+SocialActivity.belongsTo(User,{foreignKey:'updatedBy'});
 
 PerfusionCase.hasMany(PerfusionCaseItem, {
     foreignKey: 'perfusionCaseId', onDelete: 'CASCADE', as: "items"
@@ -1025,6 +1046,15 @@ module.exports = {
     MeetingParticipant,
     MeetingIdea,
     PatientCRM,
+    PatientCRMCity,
+    PatientCRMAddress,
+    PatientCRMReferType,
+    PatientCRMReferName,
+    PatientCRMStatus,
+    PatientCRMProfession,
     FirstStage,
-    DoctorStage
+    DoctorStage,
+    AppointmentStage,
+    ClinicStage,
+    SocialActivity
 };

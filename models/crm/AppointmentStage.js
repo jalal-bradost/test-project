@@ -1,34 +1,18 @@
 const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  const FirstStage = sequelize.define("FirstStage", {
-    firstStageId: {
+  const AppointmentStage = sequelize.define("AppointmentStage", {
+    appointmentStageId: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
-    calledType: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    duration: {
-      type: DataTypes.FLOAT,
+    appointmentDateTime: {
+      type: DataTypes.DATE,
       allowNull: false,
     },
     calledDateTime: {
       type: DataTypes.DATE,
-      allowNull: false,
-    },
-    satisfied: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    vip: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    vipReason: {
-      type: DataTypes.STRING(255),
       allowNull: true,
     },
     note: {
@@ -39,12 +23,8 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING(500),
       allowNull: true,
     },
-    isDocumentSent: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    purpose: {
-      type: DataTypes.STRING(255),
+    reasonWhy: {
+      type: DataTypes.STRING(500),
       allowNull: true,
     },
     compliant: {
@@ -53,12 +33,12 @@ module.exports = (sequelize) => {
     },
   });
 
-  FirstStage.getPatients = async () => {
+  AppointmentStage.getPatients = async () => {
     const [results, metadata] = await sequelize.query(
       `SELECT "fullname", "patientId"  FROM "PatientCRMs"`,
     );
     return results;
   };
 
-  return FirstStage;
+  return AppointmentStage;
 };

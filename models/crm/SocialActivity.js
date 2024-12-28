@@ -1,8 +1,8 @@
 const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  const FirstStage = sequelize.define("FirstStage", {
-    firstStageId: {
+  const SocialActivity = sequelize.define("SocialActivity", {
+    socialActivityId: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
@@ -11,25 +11,13 @@ module.exports = (sequelize) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    duration: {
+    timeSpent: {
       type: DataTypes.FLOAT,
       allowNull: false,
     },
     calledDateTime: {
       type: DataTypes.DATE,
       allowNull: false,
-    },
-    satisfied: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    vip: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    vipReason: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
     },
     note: {
       type: DataTypes.STRING(255),
@@ -39,26 +27,30 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING(500),
       allowNull: true,
     },
-    isDocumentSent: {
+    status: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    purpose: {
-      type: DataTypes.STRING(255),
       allowNull: true,
     },
-    compliant: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
+    numberOfPatients:{
+        type: DataTypes.INTEGER,
+        allowNull: true,
     },
+    createdBy:{
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    },
+    updatedBy:{
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    }
   });
 
-  FirstStage.getPatients = async () => {
+  SocialActivity.getPatients = async () => {
     const [results, metadata] = await sequelize.query(
       `SELECT "fullname", "patientId"  FROM "PatientCRMs"`,
     );
     return results;
   };
 
-  return FirstStage;
+  return SocialActivity;
 };

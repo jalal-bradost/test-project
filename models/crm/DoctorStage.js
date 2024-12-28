@@ -51,11 +51,22 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING(500),
       allowNull: true,
     },
+    compliant: { // Added purpose as per your new field
+      type: DataTypes.STRING(500),
+      allowNull: true,
+    }, 
     interactionCount:{
       type:DataTypes.INTEGER,
       allowNull: true,
     } 
   });
+
+  DoctorStage.getPatients = async () => {
+    const [results, metadata] = await sequelize.query(
+      `SELECT "fullname", "patientId"  FROM "PatientCRMs"`,
+    );
+    return results;
+  };
 
   return DoctorStage;
 };

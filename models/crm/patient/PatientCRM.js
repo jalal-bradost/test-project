@@ -46,6 +46,11 @@ module.exports = (sequelize) => {
         bloodType: {
             type: DataTypes.INTEGER,
             allowNull: false,
-        }
+        },
+        note:{
+            type: DataTypes.STRING(255),
+            allowNull: true,
+        },
+        
     });
 }

@@ -2,6 +2,7 @@ const router = require("../../../config/express");
 const {
   createDoctorStage,   // Updated controller function for creating a DoctorStage
   getAllDoctorStages,  // Updated controller function for getting all DoctorStage records
+  getPatients,
   getDoctorStageById,  // Updated controller function for getting a DoctorStage by ID
   updateDoctorStage,   // Updated controller function for updating a DoctorStage record
   deleteDoctorStage,   // Updated controller function for deleting a DoctorStage record
@@ -12,6 +13,9 @@ router.post('/crm/doctor-stage', createDoctorStage);
 
 // Get all DoctorStage records
 router.get('/crm/doctor-stage', getAllDoctorStages);
+
+// Get all Patient records
+router.get('/crm/doctor-stage/patients', getPatients);
 
 // Get a single DoctorStage record by ID
 router.get("/crm/doctor-stage/:id", getDoctorStageById);

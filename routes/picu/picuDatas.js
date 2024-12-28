@@ -4,7 +4,7 @@ const {
     PICUData, sequelize, ProductStorage, Patient, PICUDataOperationTypeJunction, Product, PICUOperationType,
     ICUData,
     ICUOperationType,
-    ICUDataOperationTypeJunction, SWDataOperationTypeJunction,
+    ICUDataOperationTypeJunction, SWDataOperationTypeJunction,ProductInvoice
 } = require("../../models");
 const returnInCaseOfInvalidation = require("../../middlware/returnInCaseOfInvalidation");
 const requirePermissions = require("../../middlware/requirePermissions");
@@ -53,37 +53,71 @@ router.get("/picu/data/:picuId", param("picuId").isInt(), returnInCaseOfInvalida
 
 router.get("/picu/data", async (req, res) => {
     try {
-        const picuDatas = await PICUData.findAll({include: [{model: Patient}, {model: PICUOperationType}]});
-        const filteredPicuData = []
+        const picuDatas = await PICUData.findAll({
+            include: [
+                { model: Patient },
+                { model: PICUOperationType }
+            ]
+        });
+        const filteredPicuData = [];
+
         for (const model of picuDatas) {
-            const data = model.get({plain: true});
+            const data = model.get({ plain: true });
             filteredPicuData.push({
                 ...data,
-                items: cleanItems(data.items),
-            })
+                items: await cleanItems(data.items), // Await cleanItems to handle async operations
+            });
         }
+
         return res.json(filteredPicuData.sort((a, b) => (a.picuId < b.picuId ? 1 : -1)));
     } catch (e) {
         console.log(e);
-        return res.status(500).json({message: "هەڵەیەک ڕوویدا لە سێرڤەر"});
+        return res.status(500).json({ message: "هەڵەیەک ڕوویدا لە سێرڤەر" });
     }
 });
 
-const cleanItems = (items) => {
-    return items.map(item => ({
-        barcode: item.barcode,
-        product: {
-            code: item.product.code,
-            name: item.product.name,
-            size: item.product.size,
-            image: item.product.image,
-            barcode: item.product.barcode,
-            specialPriceUSD: item.product.specialPriceUSD,
-            perBox: item.product.perBox
-        },
-        quantity: item.quantity
-    }));
-}
+const cleanItems = async (items) => {
+    return Promise.all(
+        items.map(async (item) => {
+            // Query ProductStorage directly
+            const productInStorage = await ProductStorage.findOne({
+                where: {
+                    barcode: item.barcode,
+                    storageId: 15,
+                },
+            });
+
+            const latestInvoice = await ProductInvoice.findOne({
+                where: {
+                  barcode: item.barcode,
+                },
+                //   order: [['createdAt', 'DESC']], // Get the latest invoice based on createdAt
+              });
+        
+              let productCost = 0;
+              if (latestInvoice) {
+                const { price } = latestInvoice.dataValues;
+                const { perBox } = item.product;
+                productCost = perBox > 1 ? price / perBox : price;
+              }
+        
+              return {
+                barcode: item.barcode,
+                product: {
+                  id: item.product.code,
+                  name: item.product.name,
+                  size: item.product.size,
+                  image: item.product.image,
+                  specialPriceUSD: item.product.specialPriceUSD,
+                  perBox: item.product.perBox,
+                  isProductInPharmacyStorage: !!productInStorage, // Convert to boolean
+                  productCost,
+                },
+                quantity: item.quantity,
+              };
+        })
+    );
+};
 
 router.put("/picu/data/:picuId", [
     param("picuId").isInt(),

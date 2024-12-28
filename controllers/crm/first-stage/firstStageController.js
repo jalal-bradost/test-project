@@ -1,39 +1,34 @@
 // FirstStage Controller
-const { FirstStage,PatientCRM } = require("../../../models");
+const { FirstStage, PatientCRM, PatientCRMStatus,sequelize } = require("../../../models");
 
 module.exports = {
   // Create or use existing patient, then create FirstStage
   createFirstStage: async (req, res) => {
     // console.log("Request initiated");
     try {
-      const { phoneNumber, fullname, birthdate, sex, bloodType, ...firstStageData } = req.body;
+      const { patientId, statusId, ...firstStageData } = req.body;
 
-      // console.log("Phone Number:", phoneNumber);
+      // Retrieve and update PatientCRM record
+      const patient = await PatientCRM.findByPk(patientId);
+      if (!patient) {
+        return res.status(404).json({
+          message:
+            "Patient record not found. Unable to proceed with FirstStage creation.",
+        });
+      }
 
-      // Validate or create patient
-      const [patient, created] = await PatientCRM.findOrCreate({
-        where: { phoneNumber: phoneNumber.trim() },
-        defaults: {
-          phoneNumber: phoneNumber.trim(),
-          fullname,
-          birthdate,
-          sex,
-          bloodType,
-        }, // Include all required fields
-      });
-
-      // console.log(`Patient ${created ? "created" : "found"}:`, patient);
+      // Update the statusId of the PatientCRM record
+      await patient.update({ statusId });
 
       // Create FirstStage
       const firstStage = await FirstStage.create({
+        patientId,
         ...firstStageData,
-        patientId: patient.patientId,
       });
 
       res.status(201).json({
         message: "FirstStage record created successfully",
         firstStage,
-        patient,
       });
     } catch (error) {
       console.error("Error in createFirstStage:", error.message);
@@ -44,13 +39,30 @@ module.exports = {
   // Get all FirstStage records
   getAllFirstStages: async (req, res) => {
     try {
-      console.log('request initiated')
       const firstStages = await FirstStage.findAll({
-        include: PatientCRM, // Include related PatientCRM records
+        include: {
+          model: PatientCRM, // Include related PatientCRM records
+          attributes: ["patientId", "fullname", "phoneNumber"],
+          include: {
+            model: PatientCRMStatus,
+            attributes: ["name", "statusId"],
+            as: "status",
+          },
+        },
       });
       res.status(200).json(firstStages);
     } catch (error) {
-      console.log(error)
+      console.log(error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  getPatients: async (req, res) => {
+    try {
+      const patients = await FirstStage.getPatients();
+      res.status(200).json(patients);
+    } catch (error) {
+      console.log(error);
       res.status(500).json({ error: error.message });
     }
   },
@@ -75,21 +87,71 @@ module.exports = {
 
   // Update a FirstStage record by ID
   updateFirstStage: async (req, res) => {
-    console.log(req.body)
+    console.log(req.body);
+    const transaction = await sequelize.transaction(); // Start transaction
     try {
-      const  id  = req.body.firstStageId;
-      const [updated] = await FirstStage.update(req.body, {
-        where: { firstStageId: id },
-      });
-
-      if (!updated) {
-        return res.status(404).json({ message: "FirstStage record not found" });
+      const { firstStageId, ...firstStageData } = req.body;
+  
+      // Validate and update PatientCRM status if provided
+      if (firstStageData.PatientCRM && firstStageData.PatientCRM.status) {
+        const { statusId } = firstStageData.PatientCRM.status;
+  
+        // Retrieve the associated PatientCRM from the FirstStage
+        const firstStage = await FirstStage.findByPk(firstStageId, {
+          include: [{ model: PatientCRM, as: "PatientCRM" }],
+          transaction,
+        });
+  
+        if (!firstStage || !firstStage.PatientCRM) {
+          await transaction.rollback();
+          return res
+            .status(404)
+            .json({ message: "Associated PatientCRM record not found." });
+        }
+  
+        // Update PatientCRM status
+        const patientCRMUpdateResult = await PatientCRM.update(
+          { statusId },
+          { where: { patientId: firstStage.PatientCRM.patientId }, transaction }
+        );
+  
+        if (!patientCRMUpdateResult[0]) {
+          await transaction.rollback();
+          return res
+            .status(404)
+            .json({
+              message: "PatientCRM record not found for the given patientId.",
+            });
+        }
       }
-
-      const updatedFirstStage = await FirstStage.findByPk(id);
-      res.status(200).json({ message: "FirstStage record updated successfully", updatedFirstStage });
+  
+      // Update the FirstStage record with the new data
+      const [updated] = await FirstStage.update(firstStageData, {
+        where: { firstStageId },
+        transaction,
+      });
+  
+      if (!updated) {
+        await transaction.rollback();
+        return res
+          .status(404)
+          .json({ message: "FirstStage record not found." });
+      }
+  
+      // Fetch the updated FirstStage record
+      const updatedFirstStage = await FirstStage.findByPk(firstStageId, {
+        include: [{ model: PatientCRM, as: "PatientCRM" }],
+        transaction,
+      });
+  
+      await transaction.commit();
+      res.status(200).json({
+        message: "FirstStage updated successfully.",
+        firstStage: updatedFirstStage,
+      });
     } catch (error) {
-      console.log(error)
+      console.error(error);
+      await transaction.rollback();
       res.status(500).json({ error: error.message });
     }
   },
@@ -106,7 +168,9 @@ module.exports = {
         return res.status(404).json({ message: "FirstStage record not found" });
       }
 
-      res.status(200).json({ message: "FirstStage record deleted successfully" });
+      res
+        .status(200)
+        .json({ message: "FirstStage record deleted successfully" });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

@@ -2,6 +2,7 @@ const router = require("../../../config/express");
 const {
   createFirstStage,
   getAllFirstStages,
+  getPatients,
   getFirstStageById,
   updateFirstStage,
   deleteFirstStage,
@@ -12,6 +13,8 @@ router.post('/crm/first-stage', createFirstStage);
 
 // Get all FirstStage records
 router.get('/crm/first-stage', getAllFirstStages);
+
+router.get('/crm/first-stage/patients', getPatients);
 
 // Get a single FirstStage record by ID
 router.get("/:id", getFirstStageById);
