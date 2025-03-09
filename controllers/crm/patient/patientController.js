@@ -52,6 +52,7 @@ module.exports = {
     try {
       // Fetching all patients with related data
       const patients = await PatientCRM.findAll({
+        where:{isActive: true},
         attributes: {
           exclude: [
             "cityId",
@@ -150,21 +151,25 @@ module.exports = {
     }
   },
 
-  // Delete a patient by ID
+  // Set isActive to false (soft delete) for a patient by ID
   deletePatient: async (req, res) => {
     try {
       const { id } = req.params;
-      const deleted = await PatientCRM.destroy({
-        where: { patientId: id },
-      });
+      
+      // Find the patient by ID and ensure the patient is active
+      const patient = await PatientCRM.findOne({ where: { patientId: id, isActive: true } });
 
-      if (!deleted) {
-        return res.status(404).json({ message: "Patient not found" });
+      if (!patient) {
+        return res.status(404).json({ message: "Active patient not found" });
       }
 
-      res.status(200).json({ message: "Patient deleted successfully" });
+      // Update the patient's isActive to false to deactivate (soft delete)
+      patient.isActive = false;
+      await patient.save();
+
+      res.status(200).json({ message: "Patient deactivated successfully" });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  },
+  }
 };

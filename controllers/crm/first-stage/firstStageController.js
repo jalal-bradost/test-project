@@ -42,7 +42,8 @@ module.exports = {
       const firstStages = await FirstStage.findAll({
         include: {
           model: PatientCRM, // Include related PatientCRM records
-          attributes: ["patientId", "fullname", "phoneNumber"],
+          attributes: ["patientId", "fullname", "phoneNumber",],
+          where: { isActive: true },
           include: {
             model: PatientCRMStatus,
             attributes: ["name", "statusId"],
@@ -139,15 +140,15 @@ module.exports = {
       }
   
       // Fetch the updated FirstStage record
-      const updatedFirstStage = await FirstStage.findByPk(firstStageId, {
-        include: [{ model: PatientCRM, as: "PatientCRM" }],
-        transaction,
-      });
+      // const updatedFirstStage = await FirstStage.findByPk(firstStageId, {
+      //   include: [{ model: PatientCRM, as: "PatientCRM" }],
+      //   transaction,
+      // });
   
       await transaction.commit();
       res.status(200).json({
         message: "FirstStage updated successfully.",
-        firstStage: updatedFirstStage,
+        // firstStage: updatedFirstStage,
       });
     } catch (error) {
       console.error(error);

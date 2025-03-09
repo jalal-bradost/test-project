@@ -18,7 +18,7 @@ router.get('/crm/doctor-stage', getAllDoctorStages);
 router.get('/crm/doctor-stage/patients', getPatients);
 
 // Get a single DoctorStage record by ID
-router.get("/crm/doctor-stage/:id", getDoctorStageById);
+router.get("/crm/doctor-stage/:id", getDoctorStageById); 
 
 // Update a DoctorStage record by ID
 router.put("/crm/doctor-stage", updateDoctorStage);

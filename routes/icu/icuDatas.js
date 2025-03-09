@@ -55,74 +55,103 @@ router.get("/icu/data/:icuId", param("icuId").isInt(), returnInCaseOfInvalidatio
     }
 });
 
+// Cache objects for query promises
+const productStorageCache = new Map();
+const latestInvoiceCache = new Map();
+
 router.get("/icu/data", async (req, res) => {
-    try {
-        const icuDatas = await ICUData.findAll({
-            include: [
-                { model: Patient },
-                { model: ICUOperationType },
-                { model: PatientPayment }
-            ]
-        });
+  try {
+    const icuDatas = await ICUData.findAll({
+      include: [
+        { model: Patient },
+        { model: ICUOperationType },
+        { model: PatientPayment },
+      ],
+    });
 
-        const filteredIcuData = await Promise.all(
-            icuDatas.map(async (model) => {
-                const data = model.get({ plain: true });
-                return {
-                    ...data,
-                    items: await cleanItems(data.items)
-                };
-            })
-        );
+    const filteredIcuData = await Promise.all(
+      icuDatas.map(async (model) => {
+        const data = model.get({ plain: true });
+        return {
+          ...data,
+          items: await cleanItems(data.items),
+        };
+      })
+    );
 
-        return res.json(filteredIcuData.sort((a, b) => (a.icuId < b.icuId ? 1 : -1)));
-    } catch (e) {
-        console.log(e);
-        return res.status(500).json({ message: "هەڵەیەک ڕوویدا لە سێرڤەر" });
-    }
+    // Sort descending by icuId
+    return res.json(filteredIcuData.sort((a, b) => b.icuId - a.icuId));
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: "هەڵەیەک ڕوویدا لە سێرڤەر" });
+  }
 });
 
 const cleanItems = async (items) => {
-    return Promise.all(
-        items.map(async (item) => {
-            const productInStorage = await ProductStorage.findOne({
-                where: {
-                    barcode: item.barcode,
-                    storageId: 15,
-                },
-            });
+  return Promise.all(
+    items.map(async (item) => {
+      try {
+        const barcode = item.barcode;
 
-            const latestInvoice = await ProductInvoice.findOne({
-                where: {
-                  barcode: item.barcode,
-                },
-                //   order: [['createdAt', 'DESC']], // Get the latest invoice based on createdAt
-              });
-        
-              let productCost = 0;
-              if (latestInvoice) {
-                const { price } = latestInvoice.dataValues;
-                const { perBox } = item.product;
-                productCost = perBox > 1 ? price / perBox : price;
-              }
-        
-              return {
-                barcode: item.barcode,
-                product: {
-                  id: item.product.code,
-                  name: item.product.name,
-                  size: item.product.size,
-                  image: item.product.image,
-                  specialPriceUSD: item.product.specialPriceUSD,
-                  perBox: item.product.perBox,
-                  isProductInPharmacyStorage: !!productInStorage, // Convert to boolean
-                  productCost,
-                },
-                quantity: item.quantity,
-              };
-        })
-    );
+        // Cache query for ProductStorage
+        if (!productStorageCache.has(barcode)) {
+          productStorageCache.set(
+            barcode,
+            ProductStorage.findOne({
+              where: { barcode, storageId: 15 },
+            })
+          );
+        }
+
+        // Cache query for Latest Invoice
+        if (!latestInvoiceCache.has(barcode)) {
+          latestInvoiceCache.set(
+            barcode,
+            ProductInvoice.findOne({
+              where: { barcode },
+              order: [["createdAt"]],
+            })
+          );
+        }
+
+        // Run both queries concurrently
+        const [productInStorage, latestInvoice] = await Promise.all([
+          productStorageCache.get(barcode),
+          latestInvoiceCache.get(barcode),
+        ]);
+
+        let productCost = 0;
+        if (latestInvoice) {
+          const { price } = latestInvoice.dataValues;
+          const { perBox } = item.product;
+          productCost = perBox > 1 ? price / perBox : price;
+        }
+        const usageFactorMatch = item.product.name.trim().match(/x(\d+)$/);
+        const usageFactor = usageFactorMatch ? parseInt(usageFactorMatch[1], 10) : 1;
+        productCost = productCost / usageFactor;
+
+        return {
+          barcode,
+          product: {
+            id: item.product.code,
+            name: item.product.name,
+            size: item.product.size,
+            image: item.product.image,
+            specialPriceUSD: item.product.specialPriceUSD,
+            perBox: item.product.perBox,
+            isProductInPharmacyStorage: Boolean(productInStorage),
+            productCost,
+          },
+          quantity: item.quantity,
+        };
+      } catch (err) {
+        console.error("Error processing item:", item.barcode, err);
+        return null;
+      }
+    })
+  ).then((results) => results.filter((item) => item !== null)); // Filter out failed items
 };
+
 
 router.put("/icu/data/:icuId", [
     param("icuId").isInt(),

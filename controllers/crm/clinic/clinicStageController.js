@@ -28,9 +28,10 @@ module.exports = {
         include: {
           model: PatientCRM,
           attributes: ["patientId", "fullname", "phoneNumber"],
+          where: { isActive: true },
         }, // Include related PatientCRM records
-        attributes:{
-            exclude: ["createdAt", "updatedAt"],
+        attributes: {
+          exclude: ["createdAt", "updatedAt"],
         }
       });
       res.status(200).json(clinicStages);

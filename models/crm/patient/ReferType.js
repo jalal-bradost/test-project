@@ -17,3 +17,15 @@ module.exports = (sequelize) => {
         }
     });
 }
+
+// WhatsApp message 
+// WhatsApp call
+// Messenger call
+// Messenger message
+// Instagram call 
+// Instagram message
+// Phone call
+// Telegram call
+// Telegram message 
+// TikTok message
+// Story reply

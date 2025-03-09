@@ -24,7 +24,9 @@ app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT} on version ${VERSION}`)
 })
 
-
+app.keepAliveTimeout = 300000; // Default is 5 seconds
+app.headersTimeout = 310000; // Headers timeout should be slightly higher than keepAliveTimeout
+app.timeout = 1 * 1000 * 60 * 60 * 24; // 1 hour
 // services
 require("./services/backupService")
 
@@ -73,7 +75,7 @@ require("./routes/sw/swDatas")
 require("./routes/sw/swOperatonTypes")
 require("./routes/sw/products")
 require("./routes/sw/swShifts")
-require("./routes/sw/swStaff")
+require("./routes/sw/swStaff") 
 
 // op routes
 require("./routes/op/opDatas")
@@ -182,9 +184,15 @@ require('./routes-v1/crm/patient/referTypeRoutes')
 require('./routes-v1/crm/patient/referNameRoutes')
 require('./routes-v1/crm/patient/addressRoutes')
 require('./routes-v1/crm/patient/professionRoutes')
+require('./routes-v1/crm/patient/patientDocumentRoutes')
 
 require('./routes-v1/crm/first-stage/firstStageRoutes')
 require('./routes-v1/crm/doctors-stage/doctorStageRoutes')
 require('./routes-v1/crm/appointment-stage/appointmentStageRoutes')
 require('./routes-v1/crm/clinic-stage/clinicStageRoutes')
 require('./routes-v1/crm/social-activity/socialActivityRoutes')
+require('./routes-v1/crm/social-activity/socialActivityDocumentsRoutes')
+
+require('./routes-v1/crm/surgery-calendar/surgeryTypeRoutes')
+require('./routes-v1/crm/surgery-calendar/surgeryStatusRoutes')
+require('./routes-v1/crm/surgery-calendar/surgeryCalendarRoutes')

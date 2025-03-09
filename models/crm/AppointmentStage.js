@@ -31,6 +31,10 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING(255),
       allowNull: true,
     },
+    purpose: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
   });
 
   AppointmentStage.getPatients = async () => {

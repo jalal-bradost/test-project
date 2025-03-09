@@ -8,15 +8,34 @@ const DB_PORT = process.env.DB_PORT;
 const DB_SSL = process.env.DB_SSL === "true";
 
 // Set up the Sequelize instance and establish the connection
+// const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
+//     host: DB_HOST, port: DB_PORT, dialectOptions: {
+//         // ssl: {
+//         //     require: true, rejectUnauthorized: false
+//         // }
+//     }, logging: false, dialect: "postgres", pool: {
+//         max: 27, min: 0, acquire: 30000, idle: 10000
+//     },
+
+//     dialectOptions: {
+//       connectTimeout: 6 * 1000 * 60  // 6 minutes
+//     }
+    
+// });
+
+
+
 const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
     host: DB_HOST, port: DB_PORT, dialectOptions: {
+        statement_timeout: 100000,keepAlive: true , idle_in_transaction_session_timeout: 100000,
         // ssl: {
         //     require: true, rejectUnauthorized: false
         // }
     }, logging: false, dialect: "postgres", pool: {
-        max: 27, min: 0, acquire: 30000, idle: 10000
+        max: 80, min: 0, acquire: 1000000, idle: 100000
     }
 });
+
 
 // Import models and define associations
 // const Notification = require("./warehouse/Notification")(sequelize)
@@ -161,12 +180,18 @@ const PatientCRMReferType = require('./crm/patient/ReferType')(sequelize)
 const PatientCRMReferName = require('./crm/patient/ReferName')(sequelize)
 const PatientCRMStatus = require('./crm/patient/Status')(sequelize)
 const PatientCRMProfession = require('./crm/patient/Proffession')(sequelize)
+const PatientCRMDocuments = require('./crm/patient/PatientDocument')(sequelize)
 
 const FirstStage = require('./crm/FirstStage')(sequelize)
 const DoctorStage = require('./crm/DoctorStage')(sequelize)
 const AppointmentStage = require('./crm/AppointmentStage')(sequelize)
 const ClinicStage = require('./crm/ClinicStage')(sequelize)
 const SocialActivity = require('./crm/SocialActivity')(sequelize)
+const SocialActivityDocuments = require('./crm/SocialActivityDocuments')(sequelize)
+
+const SurgeryCalendarCRM = require('./crm/surgery-calendar/SurgeryCalendar')(sequelize)
+const SurgeryStatusCRM = require('./crm/surgery-calendar/SurgeryStatus')(sequelize)
+const SurgeryTypeCRM = require('./crm/surgery-calendar/SurgeryType')(sequelize)
 
 PatientCRM.belongsTo(PatientCRMCity, { foreignKey: "cityId", as: "city" });
 PatientCRM.belongsTo(PatientCRMAddress, { foreignKey: "addressId", as: "address" });
@@ -174,6 +199,8 @@ PatientCRM.belongsTo(PatientCRMReferType, { foreignKey: "referTypeId", as: "refe
 PatientCRM.belongsTo(PatientCRMReferName, { foreignKey: "referNameId", as: "refer_name" });
 PatientCRM.belongsTo(PatientCRMStatus, { foreignKey: "statusId", as: "status" });
 PatientCRM.belongsTo(PatientCRMProfession, { foreignKey: "professionId", as: "profession" });
+
+PatientCRMDocuments.belongsTo(PatientCRM, { foreignKey: 'patientId' });
 
 FirstStage.belongsTo(PatientCRM, { foreignKey: 'patientId' });
 
@@ -183,15 +210,23 @@ AppointmentStage.belongsTo(PatientCRM, { foreignKey: 'patientId' });
 
 ClinicStage.belongsTo(PatientCRM, { foreignKey: 'patientId' });
 
+
 SocialActivity.belongsTo(User,{foreignKey:'createdBy'});
 SocialActivity.belongsTo(User,{foreignKey:'updatedBy'});
+
+// SocialActivity.belongsTo(SocialActivityDocuments,{foreignKey:'socialActivityId'});
+SocialActivityDocuments.belongsTo(SocialActivity,{foreignKey:'socialActivityId'});  
+
+SurgeryCalendarCRM.belongsTo(PatientCRM, { foreignKey: 'patientId' });
+SurgeryCalendarCRM.belongsTo(SurgeryStatusCRM, { foreignKey: 'surgeryStatusId' });
+SurgeryCalendarCRM.belongsTo(SurgeryTypeCRM, { foreignKey: 'surgeryTypeId' });
 
 PerfusionCase.hasMany(PerfusionCaseItem, {
     foreignKey: 'perfusionCaseId', onDelete: 'CASCADE', as: "items"
 });
 PerfusionCaseItem.belongsTo(PerfusionCase, {
     foreignKey: 'perfusionCaseId', as: "case"
-});
+}); 
 
 const AnesthesiaCase = require("./anesthesia_v1/AnesthesiaCase")(sequelize)
 const AnesthesiaCaseItem = require("./anesthesia_v1/AnesthesiaCaseItem")(sequelize)
@@ -500,9 +535,9 @@ PatientPayment.hasMany(PatientPaymentLog, {
     foreignKey: "patientPaymentId", onDelete: 'CASCADE', as: "logs"
 });
 
-PatientPaymentLog.belongsTo(PatientPayment, {
-    foreignKey: "patientPaymentId"
-});
+// PatientPaymentLog.belongsTo(PatientPayment, {
+//     foreignKey: "patientPaymentId"
+// });
 
 PatientPayment.hasMany(PatientPaymentExpense, {
     foreignKey: "patientPaymentId", onDelete: 'CASCADE', as: "expenses"
@@ -1045,16 +1080,21 @@ module.exports = {
     Meeting,
     MeetingParticipant,
     MeetingIdea,
-    PatientCRM,
-    PatientCRMCity,
-    PatientCRMAddress,
-    PatientCRMReferType,
-    PatientCRMReferName,
-    PatientCRMStatus,
-    PatientCRMProfession,
-    FirstStage,
-    DoctorStage,
-    AppointmentStage,
-    ClinicStage,
-    SocialActivity
+    // PatientCRM,
+    // PatientCRMCity,
+    // PatientCRMAddress,
+    // PatientCRMReferType,
+    // PatientCRMReferName,
+    // PatientCRMStatus,
+    // PatientCRMProfession,
+    // PatientCRMDocuments,
+    // FirstStage,
+    // DoctorStage,
+    // AppointmentStage,
+    // ClinicStage,
+    // SocialActivity,
+    // SocialActivityDocuments,
+    // SurgeryCalendarCRM,
+    // SurgeryStatusCRM,
+    // SurgeryTypeCRM 
 };

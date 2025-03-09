@@ -1,4 +1,4 @@
-const { AppointmentStage, PatientCRM, PatientCRMStatus } = require("../../../models");
+const { AppointmentStage, PatientCRM, PatientCRMStatus,sequelize } = require("../../../models");
 
 module.exports = {
   // Create Appointment
@@ -16,7 +16,7 @@ module.exports = {
       //     message: "Patient is already scheduled for an appointment.",
       //   });
       // }
-  
+      console.log(appointmentData.purpose)
       // Create Appointment
       const appointment = await AppointmentStage.create({
         patientId,
@@ -42,9 +42,10 @@ module.exports = {
           model: PatientCRM,
           include:{
             model: PatientCRMStatus,
-            attributes: ['name',],  
+            attributes: ['name','statusId'],  
             as:'status'
           },
+          where: { isActive: true },
           attributes: ['patientId', 'fullname', 'phoneNumber'],  
         },
       }); 
@@ -87,26 +88,99 @@ module.exports = {
   },
 
   // Update an Appointment record by ID
+  // updateAppointment: async (req, res) => {
+  //   try {
+  //     const id = req.body.appointmentId; // Ensure the correct field name is used for ID
+  //     const [updated] = await AppointmentStage.update(req.body, {
+  //       where: { appointmentId: id }, // Match by the new field name "appointmentId"
+  //     });
+
+  //     if (!updated) {
+  //       return res.status(404).json({ message: "Appointment record not found" });
+  //     }
+
+  //     const updatedAppointment = await AppointmentStage.findByPk(id);
+  //     res.status(200).json({
+  //       message: "Appointment record updated successfully",
+  //       updatedAppointment,
+  //     });
+  //   } catch (error) {
+  //     console.error(error);
+  //     res.status(500).json({ error: error.message });
+  //   }
+  // },
   updateAppointment: async (req, res) => {
+    // Update a FirstStage record by ID
+  
+    console.log(req.body);
+    const transaction = await sequelize.transaction(); // Start transaction
     try {
-      const id = req.body.appointmentId; // Ensure the correct field name is used for ID
-      const [updated] = await AppointmentStage.update(req.body, {
-        where: { appointmentId: id }, // Match by the new field name "appointmentId"
-      });
-
-      if (!updated) {
-        return res.status(404).json({ message: "Appointment record not found" });
+      const { appointmentStageId, ...appointmentStageData } = req.body;
+      console.log(appointmentStageId)
+  
+      // Validate and update PatientCRM status if provided
+      if (appointmentStageData.PatientCRM && appointmentStageData.PatientCRM.status) {
+        const { statusId } = appointmentStageData.PatientCRM.status;
+  
+        // Retrieve the associated PatientCRM from the FirstStage
+        const firstStage = await AppointmentStage.findByPk(appointmentStageId, {
+          include: [{ model: PatientCRM, as: "PatientCRM" }],
+          transaction,
+        });
+  
+        if (!firstStage || !firstStage.PatientCRM) {
+          await transaction.rollback();
+          return res
+            .status(404)
+            .json({ message: "Associated PatientCRM record not found." });
+        }
+  
+        // Update PatientCRM status
+        const patientCRMUpdateResult = await PatientCRM.update(
+          { statusId },
+          { where: { patientId: firstStage.PatientCRM.patientId }, transaction }
+        );
+  
+        if (!patientCRMUpdateResult[0]) {
+          await transaction.rollback();
+          return res
+            .status(404)
+            .json({
+              message: "PatientCRM record not found for the given patientId.",
+            });
+        }
       }
-
-      const updatedAppointment = await AppointmentStage.findByPk(id);
+  
+      // Update the FirstStage record with the new data
+      const [updated] = await AppointmentStage.update(appointmentStageData, {
+        where: { appointmentStageId },
+        transaction,
+      });
+  
+      if (!updated) {
+        await transaction.rollback();
+        return res
+          .status(404)
+          .json({ message: "FirstStage record not found." });
+      }
+  
+      // Fetch the updated FirstStage record
+      // const updatedFirstStage = await FirstStage.findByPk(firstStageId, {
+      //   include: [{ model: PatientCRM, as: "PatientCRM" }],
+      //   transaction,
+      // });
+  
+      await transaction.commit();
       res.status(200).json({
-        message: "Appointment record updated successfully",
-        updatedAppointment,
+        message: "FirstStage updated successfully.",
+        // firstStage: updatedFirstStage,
       });
     } catch (error) {
       console.error(error);
+      await transaction.rollback();
       res.status(500).json({ error: error.message });
     }
+
   },
 
   // Delete an Appointment record by ID

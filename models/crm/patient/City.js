@@ -17,3 +17,24 @@ module.exports = (sequelize) => {
         }
     });
 }
+
+//INSERT INTO "PatientCRMCities" (name) 
+// VALUES 
+// ('Erbil'),
+// ('Sulaymaniyah'),
+// ('Duhok'),
+// ('Halabja'),
+// ('Baghdad'),
+// ('Basra'),
+// ('Mosul'),
+// ('Kirkuk'),
+// ('Najaf'),
+// ('Karbala'),
+// ('Anbar'),
+// ('Salahaddin'),
+// ('Diyala'),
+// ('Wasit'),
+// ('Maysan'),
+// ('Dhi Qar'),
+// ('Babil'),
+// ('Al-Qadisiyyah');

@@ -87,6 +87,10 @@ router.get(
   }
 );
 
+// Cache objects for query promises
+const productStorageCache = new Map();
+const latestInvoiceCache = new Map();
+
 router.get("/op/data", async (req, res) => {
   try {
     const opDatas = await OPData.findAll({
@@ -97,10 +101,7 @@ router.get("/op/data", async (req, res) => {
           model: PatientPayment,
           attributes: { include: ["surgeryCaseId"] },
           include: [
-            {
-              model: SurgeryCase,
-              as: "surgeryCase",
-            },
+            { model: SurgeryCase, as: "surgeryCase" },
           ],
         },
       ],
@@ -118,9 +119,10 @@ router.get("/op/data", async (req, res) => {
       })
     );
 
-    return res.json(filteredOpData.sort((a, b) => (a.opId < b.opId ? 1 : -1)));
+    // Sort descending by opId
+    return res.json(filteredOpData.sort((a, b) => b.opId - a.opId));
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return res.status(500).json({ message: "هەڵەیەک ڕوویدا لە سێرڤەر" });
   }
 });
@@ -128,30 +130,56 @@ router.get("/op/data", async (req, res) => {
 const cleanItems = async (items) => {
   return Promise.all(
     items.map(async (item) => {
-      // Query ProductStorage directly
-      const productInStorage = await ProductStorage.findOne({
-        where: {
-          barcode: item.barcode,
-          storageId: 15,
-        },
-      });
+      const barcode = item.barcode;
 
-      const latestInvoice = await ProductInvoice.findOne({
-        where: {
-          barcode: item.barcode,
-        },
-        //   order: [['createdAt', 'DESC']], // Get the latest invoice based on createdAt
-      });
+      // Cache query for ProductStorage if not already cached
+      if (!productStorageCache.has(barcode)) {
+        productStorageCache.set(
+          barcode,
+          sequelize.query(
+            `SELECT "productStorageId" FROM "ProductStorages" WHERE "barcode" = :barcode AND "storageId" = :storageId LIMIT 1`,
+            {
+              replacements: { barcode, storageId: 15 },
+              type: sequelize.QueryTypes.SELECT,
+            }
+          )
+        );
+      }
+
+      // Cache query for Latest Invoice if not already cached
+      if (!latestInvoiceCache.has(barcode)) {
+        latestInvoiceCache.set(
+          barcode,
+          sequelize.query(
+            `SELECT price FROM "ProductInvoices" WHERE barcode = :barcode ORDER BY "createdAt" DESC LIMIT 1`,
+            {
+              replacements: { barcode },
+              type: sequelize.QueryTypes.SELECT,
+            }
+          )
+        );
+      }
+
+      // Run both queries concurrently
+      const [productInStorage, latestInvoice] = await Promise.all([
+        productStorageCache.get(barcode),
+        latestInvoiceCache.get(barcode),
+      ]);
 
       let productCost = 0;
-      if (latestInvoice) {
-        const { price } = latestInvoice.dataValues;
+      if (latestInvoice && latestInvoice.length > 0) {
+        const price = latestInvoice[0].price;
         const { perBox } = item.product;
         productCost = perBox > 1 ? price / perBox : price;
       }
 
+      // Extract usage factor from product name (e.g., "Product X10")
+      const usageFactorMatch = item.product.name.trim().match(/x(\d+)$/);
+      const usageFactor = usageFactorMatch ? parseInt(usageFactorMatch[1], 10) : 1;
+      productCost = productCost / usageFactor;
+
       return {
-        barcode: item.barcode,
+        barcode,
         product: {
           id: item.product.code,
           name: item.product.name,
@@ -159,14 +187,16 @@ const cleanItems = async (items) => {
           image: item.product.image,
           specialPriceUSD: item.product.specialPriceUSD,
           perBox: item.product.perBox,
-          isProductInPharmacyStorage: !!productInStorage, // Convert to boolean
+          isProductInPharmacyStorage: Boolean(productInStorage && productInStorage.length),
           productCost,
         },
         quantity: item.quantity,
       };
+
     })
   );
 };
+
 
 router.put(
   "/op/data/:opId",

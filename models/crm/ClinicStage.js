@@ -15,7 +15,7 @@ module.exports = (sequelize) => {
 
   ClinicStage.getPatients = async () => {
     const [results, metadata] = await sequelize.query(
-      `SELECT "fullname", "patientId"  FROM "PatientCRMs"`,
+      `SELECT "fullname", "patientId"  FROM "PatientCRMs" where "isActive" ='true'`,
     );
     return results;
   };

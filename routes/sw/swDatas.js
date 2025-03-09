@@ -75,80 +75,100 @@ router.get(
   }
 );
 
+// Cache objects for query promises
+const productStorageCache = new Map();
+const latestInvoiceCache = new Map();
+
 router.get("/sw/data", async (req, res) => {
   try {
     const swDatas = await SWData.findAll({
-      include: [
-        { model: Patient },
-        { model: SWOperationType },
-        { model: PatientPayment },
-      ],
+      include: [{ model: Patient }, { model: SWOperationType }, { model: PatientPayment }],
     });
 
-    const filteredSwData = [];
-    for (const model of swDatas) {
-      const data = model.get({ plain: true });
-      filteredSwData.push({
-        ...data,
-        items: await cleanItems(data.items),
-      });
-    }
+    const filteredSwData = await Promise.all(
+      swDatas.map(async (model) => {
+        const data = model.get({ plain: true });
+        return {
+          ...data,
+          items: await cleanItems(data.items),
+        };
+      })
+    );
 
-    return res.json(filteredSwData.sort((a, b) => (a.swId < b.swId ? 1 : -1)));
+    // Sort descending by swId
+    return res.json(filteredSwData.sort((a, b) => b.swId - a.swId));
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return res.status(500).json({ message: "هەڵەیەک ڕوویدا لە سێرڤەر" });
   }
 });
 
-// Clean items based on the filterStorage parameter
-// Clean items based on the filterStorage parameter
 const cleanItems = async (items) => {
   return Promise.all(
     items.map(async (item) => {
-      // Query ProductStorage for the product data
-      const productInStorage = await ProductStorage.findOne({
-        where: {
-          barcode: item.barcode,
-          storageId: 15,
-        },
-      });
+      try {
+        const barcode = item.barcode;
 
-      // Query the latest ProductInvoice separately
-      const latestInvoice = await ProductInvoice.findOne({
-        where: {
-          barcode: item.barcode,
-        },
-        //   order: [['createdAt', 'DESC']], // Get the latest invoice based on createdAt
-      });
+        // Cache query for ProductStorage
+        if (!productStorageCache.has(barcode)) {
+          productStorageCache.set(
+            barcode,
+            ProductStorage.findOne({
+              where: { barcode, storageId: 15 },
+            })
+          );
+        }
 
-      // console.log(latestInvoice.dataValues.price)
-      // Determine the product cost
-      let productCost = 0;
-      if (latestInvoice) {
-        const { price } = latestInvoice.dataValues;
-        const { perBox } = item.product;
-        productCost = perBox > 1 ? price / perBox : price;
+        // Cache query for Latest Invoice
+        if (!latestInvoiceCache.has(barcode)) {
+          latestInvoiceCache.set(
+            barcode,
+            ProductInvoice.findOne({
+              where: { barcode },
+              order: [["createdAt"]],
+            })
+          );
+        }
+
+        // Run both queries concurrently
+        const [productInStorage, latestInvoice] = await Promise.all([
+          productStorageCache.get(barcode),
+          latestInvoiceCache.get(barcode),
+        ]);
+
+        let productCost = 0;
+        if (latestInvoice) {
+          const { price } = latestInvoice.dataValues;
+          const { perBox } = item.product;
+          productCost = perBox > 1 ? price / perBox : price;
+        }
+        const usageFactorMatch = item.product.name.trim().match(/x(\d+)$/);
+        const usageFactor = usageFactorMatch ? parseInt(usageFactorMatch[1], 10) : 1;
+        productCost = productCost / usageFactor;
+
+        return {
+          barcode,
+          product: {
+            code: item.product.code,
+            name: item.product.name,
+            size: item.product.size,
+            image: item.product.image,
+            barcode: item.product.barcode,
+            specialPriceUSD: item.product.specialPriceUSD,
+            perBox: item.product.perBox,
+            isProductInPharmacyStorage: Boolean(productInStorage),
+            productCost,
+          },
+          quantity: item.quantity,
+        };
+      } catch (err) {
+        console.error("Error processing item:", item.barcode, err);
+        return null;
       }
-
-      return {
-        barcode: item.barcode,
-        product: {
-          code: item.product.code,
-          name: item.product.name,
-          size: item.product.size,
-          image: item.product.image,
-          barcode: item.product.barcode,
-          specialPriceUSD: item.product.specialPriceUSD,
-          perBox: item.product.perBox,
-          isProductInPharmacyStorage: !!productInStorage, // Convert to boolean
-          productCost // Add product cost from the latest invoice
-        },
-        quantity: item.quantity,
-      };
     })
-  );
+  ).then((results) => results.filter((item) => item !== null)); // Filter out failed items
 };
+
 
 // Update
 router.put(
