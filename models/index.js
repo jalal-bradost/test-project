@@ -5,7 +5,7 @@ const DB_HOST = process.env.DB_HOST;
 const DB_USER = process.env.DB_USER;
 const DB_PASS = process.env.DB_PASS;
 const DB_PORT = process.env.DB_PORT;
-const DB_SSL = process.env.DB_SSL === "true";
+const DB_SSL = process.env.DB_SSL;
 
 // Set up the Sequelize instance and establish the connection
 // const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
@@ -28,9 +28,9 @@ const DB_SSL = process.env.DB_SSL === "true";
 const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
     host: DB_HOST, port: DB_PORT, dialectOptions: {
         statement_timeout: 100000,keepAlive: true , idle_in_transaction_session_timeout: 100000,
-        // ssl: {
-        //     require: true, rejectUnauthorized: false
-        // }
+        ssl: {
+            require: true, rejectUnauthorized: false
+        }
     }, logging: false, dialect: "postgres", pool: {
         max: 80, min: 0, acquire: 1000000, idle: 100000
     }
@@ -1080,21 +1080,21 @@ module.exports = {
     Meeting,
     MeetingParticipant,
     MeetingIdea,
-    // PatientCRM,
-    // PatientCRMCity,
-    // PatientCRMAddress,
-    // PatientCRMReferType,
-    // PatientCRMReferName,
-    // PatientCRMStatus,
-    // PatientCRMProfession,
-    // PatientCRMDocuments,
-    // FirstStage,
-    // DoctorStage,
-    // AppointmentStage,
-    // ClinicStage,
-    // SocialActivity,
-    // SocialActivityDocuments,
-    // SurgeryCalendarCRM,
-    // SurgeryStatusCRM,
-    // SurgeryTypeCRM 
+    PatientCRM,
+    PatientCRMCity,
+    PatientCRMAddress,
+    PatientCRMReferType,
+    PatientCRMReferName,
+    PatientCRMStatus,
+    PatientCRMProfession,
+    PatientCRMDocuments,
+    FirstStage,
+    DoctorStage,
+    AppointmentStage,
+    ClinicStage,
+    SocialActivity,
+    SocialActivityDocuments,
+    SurgeryCalendarCRM,
+    SurgeryStatusCRM,
+    SurgeryTypeCRM 
 };

@@ -160,6 +160,7 @@ const cleanItems = async (items) => {
             productCost,
           },
           quantity: item.quantity,
+          createdAt: item.createdAt? item.createdAt:""
         };
       } catch (err) {
         console.error("Error processing item:", item.barcode, err);
@@ -186,13 +187,19 @@ router.put(
     const t = await sequelize.transaction();
     try {
       const { swId } = req.params;
-      const { items, totalPrice } = req.body;
+      let { items, totalPrice } = req.body;
 
       const swData = await SWData.findByPk(swId);
       if (!swData) {
         await t.rollback();
         return res.status(400).json({ message: "بوونی نییە" });
       }
+
+      // Add createdAt timestamp to each item
+      items = items.map((item) => ({
+        ...item,
+        createdAt: new Date(),
+      }));
 
       swData.items = [...swData.items, ...items];
       swData.totalPrice += parseFloat(totalPrice);

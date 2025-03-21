@@ -72,6 +72,7 @@ router.get("/icu/data", async (req, res) => {
     const filteredIcuData = await Promise.all(
       icuDatas.map(async (model) => {
         const data = model.get({ plain: true });
+        console.log(data)
         return {
           ...data,
           items: await cleanItems(data.items),
