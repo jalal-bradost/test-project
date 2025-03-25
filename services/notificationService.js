@@ -101,7 +101,6 @@ async function sendMeetingNotification(employee, meeting, type) {
             description = `Reminder: Meeting "${meeting.title}" starts in 24 minutes`;
             break;
     }
-    console.log(employee.userId, title, description)
 }
 
 async function scheduleMeetingReminders() {

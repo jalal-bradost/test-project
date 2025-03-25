@@ -52,9 +52,6 @@ router.post("/pharmacy/product", requirePermissions(systemPermission), body("bar
             })
             return res.json(dbProduct)
         } else {
-            console.log({
-                ...product, image: "no-image.png"
-            })
             const dbProduct = await Product.create({
                 ...product, image: "no-image.png", systemCategoryId
             })

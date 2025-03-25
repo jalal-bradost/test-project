@@ -16,7 +16,6 @@ module.exports = {
       //     message: "Patient is already scheduled for an appointment.",
       //   });
       // }
-      console.log(appointmentData.purpose)
       // Create Appointment
       const appointment = await AppointmentStage.create({
         patientId,
@@ -112,11 +111,9 @@ module.exports = {
   updateAppointment: async (req, res) => {
     // Update a FirstStage record by ID
   
-    console.log(req.body);
     const transaction = await sequelize.transaction(); // Start transaction
     try {
       const { appointmentStageId, ...appointmentStageData } = req.body;
-      console.log(appointmentStageId)
   
       // Validate and update PatientCRM status if provided
       if (appointmentStageData.PatientCRM && appointmentStageData.PatientCRM.status) {

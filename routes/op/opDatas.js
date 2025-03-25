@@ -100,9 +100,7 @@ router.get("/op/data", async (req, res) => {
         {
           model: PatientPayment,
           attributes: { include: ["surgeryCaseId"] },
-          include: [
-            { model: SurgeryCase, as: "surgeryCase" },
-          ],
+          include: [{ model: SurgeryCase, as: "surgeryCase" }],
         },
       ],
     });
@@ -175,7 +173,9 @@ const cleanItems = async (items) => {
 
       // Extract usage factor from product name (e.g., "Product X10")
       const usageFactorMatch = item.product.name.trim().match(/x(\d+)$/);
-      const usageFactor = usageFactorMatch ? parseInt(usageFactorMatch[1], 10) : 1;
+      const usageFactor = usageFactorMatch
+        ? parseInt(usageFactorMatch[1], 10)
+        : 1;
       productCost = productCost / usageFactor;
 
       return {
@@ -187,16 +187,27 @@ const cleanItems = async (items) => {
           image: item.product.image,
           specialPriceUSD: item.product.specialPriceUSD,
           perBox: item.product.perBox,
-          isProductInPharmacyStorage: Boolean(productInStorage && productInStorage.length),
+          isProductInPharmacyStorage: Boolean(
+            productInStorage && productInStorage.length
+          ),
           productCost,
         },
         quantity: item.quantity,
+        createdAt: item.createdAt ? item.createdAt : "",
       };
-
     })
   );
 };
 
+function addCreatedAt(items) {
+  if (items && Array.isArray(items) && items.length > 0) {
+    return items.map((item) => ({
+      ...item,
+      createdAt: new Date(),
+    }));
+  }
+  return items; // Return unchanged if empty or not an array
+}
 
 router.put(
   "/op/data/:opId",
@@ -220,6 +231,13 @@ router.put(
         await t.rollback();
         return res.status(400).json({ message: "بوونی نییە" });
       }
+
+      
+      
+      // Apply function to each array
+      req.body.scrubNurseItems = addCreatedAt(req.body.scrubNurseItems);
+      req.body.perfusionItems = addCreatedAt(req.body.perfusionItems);
+      req.body.anesthesiaItems = addCreatedAt(req.body.anesthesiaItems);
 
       opData.scrubNurseItems = [
         ...opData.scrubNurseItems,

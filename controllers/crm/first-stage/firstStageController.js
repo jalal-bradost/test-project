@@ -88,7 +88,6 @@ module.exports = {
 
   // Update a FirstStage record by ID
   updateFirstStage: async (req, res) => {
-    console.log(req.body);
     const transaction = await sequelize.transaction(); // Start transaction
     try {
       const { firstStageId, ...firstStageData } = req.body;

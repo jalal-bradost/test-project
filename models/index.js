@@ -28,9 +28,9 @@ const DB_SSL = process.env.DB_SSL;
 const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
     host: DB_HOST, port: DB_PORT, dialectOptions: {
         statement_timeout: 100000,keepAlive: true , idle_in_transaction_session_timeout: 100000,
-        ssl: {
-            require: true, rejectUnauthorized: false
-        }
+        // ssl: {
+        //     require: true, rejectUnauthorized: false
+        // }
     }, logging: false, dialect: "postgres", pool: {
         max: 80, min: 0, acquire: 1000000, idle: 100000
     }

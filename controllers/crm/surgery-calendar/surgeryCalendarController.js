@@ -24,7 +24,6 @@ const getSurgeryById = async (req, res) => {
 
 const createSurgery = async (req, res) => {
     try {
-        console.log("Creating Surgery: ", req.body);
         const surgeryData = req.body;
         const newSurgery = await SurgeryCalendarCRM.create(surgeryData);
         res.status(201).json(newSurgery);

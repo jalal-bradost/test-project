@@ -49,9 +49,9 @@ const createSocialActivityDocument = async (req, res) => {
             return res.status(400).json({ message: "No document image provided." });
         }
 
-        if (!documentDescription || documentDescription.trim() === "") {
-            return res.status(400).json({ message: "Document description is required." });
-        }
+        // if (!documentDescription || documentDescription.trim() === "") {
+        //     return res.status(400).json({ message: "Document description is required." });
+        // }
         
         
         const currentDateTime = new Date().toISOString().replace(/[-:]/g, "").replace(".", "").replace("T", "_").slice(0, -5); 

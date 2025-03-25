@@ -20,11 +20,15 @@ module.exports = (sequelize) => {
             type: DataTypes.DATE,
             allowNull: false,
         },
+        reasonWhy:{
+            type: DataTypes.STRING(100),
+            allowNull: true,
+
+        },
         note:{
             type: DataTypes.STRING(255),
             allowNull: true,
         }
-        
     });
     SurgeryCalendar.getPatients = async () => {
         const [results, metadata] = await sequelize.query(

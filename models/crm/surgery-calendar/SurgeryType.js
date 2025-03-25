@@ -4,7 +4,7 @@ const {DataTypes} = require("sequelize");
 //status (pending), refer by, refer name
 
 module.exports = (sequelize) => {
-    return sequelize.define("SurgeryType", {
+    return sequelize.define("SurgeryTypeCRM", {
         surgeryTypeId: {
             type: DataTypes.INTEGER,
             allowNull: false,
