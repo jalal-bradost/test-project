@@ -197,3 +197,8 @@ require('./routes-v1/crm/social-activity/socialActivityDocumentsRoutes')
 require('./routes-v1/crm/surgery-calendar/surgeryTypeRoutes')
 require('./routes-v1/crm/surgery-calendar/surgeryStatusRoutes')
 require('./routes-v1/crm/surgery-calendar/surgeryCalendarRoutes')
+
+//research
+require('./routes-v1/research/followup/patientFollowupRoutes')
+require('./routes-v1/research/followup/followupStageRoutes')
+require('./routes-v1/research/followup/surgeryTypeResearchRoutes')

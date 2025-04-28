@@ -1,4 +1,4 @@
-const {Sequelize} = require("sequelize");
+const { Sequelize } = require("sequelize");
 
 const DB_NAME = process.env.DB_NAME;
 const DB_HOST = process.env.DB_HOST;
@@ -20,14 +20,14 @@ const DB_SSL = process.env.DB_SSL;
 //     dialectOptions: {
 //       connectTimeout: 6 * 1000 * 60  // 6 minutes
 //     }
-    
+
 // });
 
 
 
 const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
     host: DB_HOST, port: DB_PORT, dialectOptions: {
-        statement_timeout: 100000,keepAlive: true , idle_in_transaction_session_timeout: 100000,
+        statement_timeout: 100000, keepAlive: true, idle_in_transaction_session_timeout: 100000,
         // ssl: {
         //     require: true, rejectUnauthorized: false
         // }
@@ -211,11 +211,23 @@ AppointmentStage.belongsTo(PatientCRM, { foreignKey: 'patientId' });
 ClinicStage.belongsTo(PatientCRM, { foreignKey: 'patientId' });
 
 
-SocialActivity.belongsTo(User,{foreignKey:'createdBy'});
-SocialActivity.belongsTo(User,{foreignKey:'updatedBy'});
+SocialActivity.belongsTo(User, { foreignKey: 'createdBy' });
+SocialActivity.belongsTo(User, { foreignKey: 'updatedBy' });
+
+//Research
+const PatientFollowUp = require("./research/followup/PatientFollowup")(sequelize);
+const FollowUpStage = require("./research/followup/FollowupStage")(sequelize);
+const SurgeryTypeResearch = require("./research/followup/SurgeryTypeResearch")(sequelize);
+
+PatientFollowUp.hasMany(FollowUpStage, { foreignKey: "patientId", onDelete: "CASCADE", });
+FollowUpStage.belongsTo(PatientFollowUp, { foreignKey: "patientId" });
+
+
+PatientFollowUp.belongsTo(SurgeryTypeResearch, { foreignKey: "surgeryTypeId", onDelete: "CASCADE", }); 
+
 
 // SocialActivity.belongsTo(SocialActivityDocuments,{foreignKey:'socialActivityId'});
-SocialActivityDocuments.belongsTo(SocialActivity,{foreignKey:'socialActivityId'});  
+SocialActivityDocuments.belongsTo(SocialActivity, { foreignKey: 'socialActivityId' });
 
 SurgeryCalendarCRM.belongsTo(PatientCRM, { foreignKey: 'patientId' });
 SurgeryCalendarCRM.belongsTo(SurgeryStatusCRM, { foreignKey: 'surgeryStatusId' });
@@ -226,7 +238,7 @@ PerfusionCase.hasMany(PerfusionCaseItem, {
 });
 PerfusionCaseItem.belongsTo(PerfusionCase, {
     foreignKey: 'perfusionCaseId', as: "case"
-}); 
+});
 
 const AnesthesiaCase = require("./anesthesia_v1/AnesthesiaCase")(sequelize)
 const AnesthesiaCaseItem = require("./anesthesia_v1/AnesthesiaCaseItem")(sequelize)
@@ -456,20 +468,20 @@ SWData.belongsTo(Patient, {
     foreignKey: 'patientId'
 });
 
-Buy.hasOne(BuyDebt, {foreignKey: 'buyId', onDelete: 'CASCADE'});
-BuyDebt.belongsTo(Buy, {foreignKey: 'buyId'});
+Buy.hasOne(BuyDebt, { foreignKey: 'buyId', onDelete: 'CASCADE' });
+BuyDebt.belongsTo(Buy, { foreignKey: 'buyId' });
 
-Sell.hasOne(SellDebt, {foreignKey: 'sellId', onDelete: 'CASCADE'});
-SellDebt.belongsTo(Sell, {foreignKey: 'sellId'});
+Sell.hasOne(SellDebt, { foreignKey: 'sellId', onDelete: 'CASCADE' });
+SellDebt.belongsTo(Sell, { foreignKey: 'sellId' });
 
-User.hasMany(Session, {foreignKey: 'userId', onDelete: 'CASCADE'});
-Session.belongsTo(User, {foreignKey: 'userId'});
+User.hasMany(Session, { foreignKey: 'userId', onDelete: 'CASCADE' });
+Session.belongsTo(User, { foreignKey: 'userId' });
 
-Role.hasMany(User, {foreignKey: 'roleId', onDelete: 'RESTRICT'});
-User.belongsTo(Role, {foreignKey: 'roleId'});
+Role.hasMany(User, { foreignKey: 'roleId', onDelete: 'RESTRICT' });
+User.belongsTo(Role, { foreignKey: 'roleId' });
 
-User.hasMany(NetWorth, {foreignKey: 'userId', onDelete: 'RESTRICT'});
-NetWorth.belongsTo(User, {foreignKey: 'userId'});
+User.hasMany(NetWorth, { foreignKey: 'userId', onDelete: 'RESTRICT' });
+NetWorth.belongsTo(User, { foreignKey: 'userId' });
 
 Transfer.belongsTo(Storage, {
     foreignKey: 'toStorageId', as: 'toStorage'
@@ -710,11 +722,11 @@ OrderChat.belongsTo(DepartmentOrder, {
     foreignKey: 'orderId'
 });
 
-OrderChat.hasMany(OrderChatSeen, {foreignKey: 'chatId', as: "seenBy"});
-OrderChatSeen.belongsTo(OrderChat, {foreignKey: 'chatId'});
+OrderChat.hasMany(OrderChatSeen, { foreignKey: 'chatId', as: "seenBy" });
+OrderChatSeen.belongsTo(OrderChat, { foreignKey: 'chatId' });
 
-EmployeeTaskChat.hasMany(EmployeeTaskChatSeen, {foreignKey: 'chatId', as: "seenBy"});
-EmployeeTaskChatSeen.belongsTo(EmployeeTaskChat, {foreignKey: 'chatId'});
+EmployeeTaskChat.hasMany(EmployeeTaskChatSeen, { foreignKey: 'chatId', as: "seenBy" });
+EmployeeTaskChatSeen.belongsTo(EmployeeTaskChat, { foreignKey: 'chatId' });
 
 User.hasMany(OrderChat, {
     foreignKey: 'userId', onDelete: 'CASCADE', as: "chats"
@@ -1096,5 +1108,8 @@ module.exports = {
     SocialActivityDocuments,
     SurgeryCalendarCRM,
     SurgeryStatusCRM,
-    SurgeryTypeCRM 
+    SurgeryTypeCRM,
+    PatientFollowUp,
+    FollowUpStage,
+    SurgeryTypeResearch,
 };
