@@ -19,9 +19,9 @@ module.exports = (sequelize) => {
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
-    called: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
+    status: {
+      type: DataTypes.ENUM("pending", "called", "no_answer", "deceased"),
+      defaultValue: "pending",
     },
     calledDate: {
       type: DataTypes.DATEONLY,
@@ -31,7 +31,7 @@ module.exports = (sequelize) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-  });
+  }); 
 
   return FollowUpStage;
 };
