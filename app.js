@@ -55,6 +55,7 @@ require("./routes/warehouse/buyDebts")
 require("./routes/warehouse/sellDebts")
 require("./routes/notifications")
 require("./routes/warehouse/productReduction")
+require("./routes/warehouse/productReport")
 
 // icu routes
 require("./routes/icu/icuDatas")
