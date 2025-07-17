@@ -1,4 +1,4 @@
-const { SocialActivity, User, sequelize } = require("../../../models");
+const { SocialActivity, User,CrmActivityLog, sequelize } = require("../../../models");
 const { Sequelize, Op } = require('sequelize');
 
 module.exports = {
@@ -14,6 +14,15 @@ module.exports = {
         ...socialActivityData,
         createdBy,
         updatedBy,
+      });
+
+      // Log the activity
+      await CrmActivityLog.create({
+        stage: "Social Activity Created",
+        createdBy,
+        objectType: "SocialActivity",
+        objectId: socialActivity.socialActivityId,
+        note: `Social Activity created with ID: ${socialActivity.socialActivityId}, name: ${socialActivity.activityName}`,
       });
 
       res.status(201).json({
@@ -99,6 +108,17 @@ module.exports = {
       }
 
       const updatedSocialActivity = await SocialActivity.findByPk(id);
+
+      // Log the activity
+      const createdBy = req.user.userId;
+      await CrmActivityLog.create({
+        stage: "Social Activity Updated",
+        createdBy,
+        objectType: "SocialActivity",
+        objectId: updatedSocialActivity.socialActivityId,
+        note: `Social Activity updated with ID: ${updatedSocialActivity.socialActivityId}`,
+      });
+
       res.status(200).json({
         message: "SocialActivity record updated successfully",
         updatedSocialActivity,
@@ -122,6 +142,16 @@ module.exports = {
           .status(404)
           .json({ message: "SocialActivity record not found" });
       }
+
+      // Log the activity
+      const createdBy = req.user.userId;
+      await CrmActivityLog.create({
+        stage: "Social Activity Deleted",
+        createdBy,
+        objectType: "SocialActivity",
+        objectId: id,
+        note: `Social Activity deleted with ID: ${id}`,
+      });
 
       res
         .status(200)

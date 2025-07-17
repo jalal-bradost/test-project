@@ -22,9 +22,9 @@ router.get('/v1/crm/social-activity/patients', getPatients);
 router.get('/v1/crm/social-activity/:id', getSocialActivityById);
 
 // Update a SocialActivity record by ID
-router.put('/v1/crm/social-activity', updateSocialActivity);
+router.put('/v1/crm/social-activity',passport.authenticate('bearer', { session: false }), updateSocialActivity);
 
 // Delete a SocialActivity record by ID
-router.delete('/v1/crm/social-activity/:id', deleteSocialActivity);
+router.delete('/v1/crm/social-activity/:id',passport.authenticate('bearer', { session: false }), deleteSocialActivity);
 
 module.exports = router;

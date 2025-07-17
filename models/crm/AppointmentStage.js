@@ -35,6 +35,10 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING(255),
       allowNull: true,
     },
+    isAttended: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    }
   });
 
   AppointmentStage.getPatients = async () => {

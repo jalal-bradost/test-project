@@ -55,7 +55,8 @@ require("./routes/warehouse/buyDebts")
 require("./routes/warehouse/sellDebts")
 require("./routes/notifications")
 require("./routes/warehouse/productReduction")
-require("./routes/warehouse/productReport")
+require("./routes/warehouse/topProductsReport")
+require("./routes/warehouse/patientProductsReport")
 
 // icu routes
 require("./routes/icu/icuDatas")
@@ -198,6 +199,8 @@ require('./routes-v1/crm/social-activity/socialActivityDocumentsRoutes')
 require('./routes-v1/crm/surgery-calendar/surgeryTypeRoutes')
 require('./routes-v1/crm/surgery-calendar/surgeryStatusRoutes')
 require('./routes-v1/crm/surgery-calendar/surgeryCalendarRoutes')
+
+require('./routes-v1/crm/activity-log/crmActivityLogRoutes')
 
 //research
 require('./routes-v1/research/followup/patientFollowupRoutes')

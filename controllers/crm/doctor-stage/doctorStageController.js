@@ -1,10 +1,11 @@
-const { DoctorStage, PatientCRM,PatientCRMStatus, sequelize } = require("../../../models");
+const { DoctorStage, PatientCRM,PatientCRMStatus,CrmActivityLog, sequelize } = require("../../../models");
 
 module.exports = {
   // Create or use existing patient, then create DoctorStage
   createDoctorStage: async (req, res) => {
     try {
-      const { patientId, statusId, ...doctorStageData } = req.body;
+      const createdBy = req.user.userId;
+      const { patientId,  ...doctorStageData } = req.body;
 
       // Retrieve and update PatientCRM record
       const patient = await PatientCRM.findByPk(patientId);
@@ -14,6 +15,8 @@ module.exports = {
         });
       }
 
+      var statusId= 7;
+
       // Update the statusId of the PatientCRM record
       await patient.update({ statusId });
 
@@ -21,6 +24,16 @@ module.exports = {
       const doctorStage = await DoctorStage.create({
         patientId,
         ...doctorStageData,
+      });
+
+      // Log the activity
+      await CrmActivityLog.create({
+        stage: "Doctor Stage Created",
+        createdBy,
+        objectType: "DoctorStage",
+        objectId: doctorStage.doctorStageId,
+        patientId: patientId,
+        note: `Doctor Stage created for patient ID: ${patientId}, name: ${patient.fullname}`,
       });
 
       res.status(201).json({
@@ -89,6 +102,7 @@ module.exports = {
     
 
     try {
+      const createdBy = req.user.userId;
       const { doctorStageId, ...doctorStageData } = req.body;
 
       // Retrieve the associated DoctorStage record
@@ -142,8 +156,19 @@ module.exports = {
       //   include: [{ model: PatientCRM, as: "PatientCRM" }],
       //   transaction,
       // });
+      
 
       await transaction.commit();
+
+      // Log the activity
+      await CrmActivityLog.create({
+        stage: "Doctor Stage Updated",
+        createdBy,
+        objectType: "DoctorStage",
+        objectId: doctorStageId,
+        patientId: doctorStage.PatientCRM.patientId,
+        note: `Doctor Stage updated for patient ID: ${doctorStage.PatientCRM.patientId}, name: ${doctorStage.PatientCRM.fullname}`,
+      });
       res.status(200).json({
         message: "DoctorStage updated successfully.",
         // updatedDoctorStage,
@@ -166,6 +191,26 @@ module.exports = {
       if (!deleted) {
         return res.status(404).json({ message: "DoctorStage record not found" });
       }
+
+      //find patient name
+      const doctorStage = await DoctorStage.findByPk(id, {
+        include: PatientCRM,
+      });
+
+      if (!doctorStage) {
+        return res.status(404).json({ message: "DoctorStage record not found" });
+      }
+
+      // Log the activity
+      const createdBy = req.user.userId;
+      await CrmActivityLog.create({
+        stage: "Doctor Stage Deleted",
+        createdBy,
+        objectType: "DoctorStage",
+        objectId: id,
+        patientId: doctorStage.PatientCRM.patientId,
+        note: `Doctor Stage deleted for patient ID: ${doctorStage.PatientCRM.patientId}, name: ${doctorStage.PatientCRM.fullname}`,
+      });
 
       res.status(200).json({ message: "DoctorStage record deleted successfully" });
     } catch (error) {

@@ -1,12 +1,12 @@
 // FirstStage Controller
-const { FirstStage, PatientCRM, PatientCRMStatus,sequelize } = require("../../../models");
+const { FirstStage, PatientCRM, PatientCRMStatus,CrmActivityLog, sequelize } = require("../../../models");
 
 module.exports = {
   // Create or use existing patient, then create FirstStage
   createFirstStage: async (req, res) => {
     // console.log("Request initiated");
     try {
-      const { patientId, statusId, ...firstStageData } = req.body;
+      var { patientId, statusId, ...firstStageData } = req.body;
 
       // Retrieve and update PatientCRM record
       const patient = await PatientCRM.findByPk(patientId);
@@ -16,6 +16,7 @@ module.exports = {
             "Patient record not found. Unable to proceed with FirstStage creation.",
         });
       }
+      statusId=1;
 
       // Update the statusId of the PatientCRM record
       await patient.update({ statusId });
@@ -24,6 +25,17 @@ module.exports = {
       const firstStage = await FirstStage.create({
         patientId,
         ...firstStageData,
+      });
+
+      // Log the activity
+      const createdBy = req.user.userId;
+      await CrmActivityLog.create({
+        stage: "First Stage Created",
+        createdBy,
+        objectType: "FirstStage",
+        objectId: firstStage.firstStageId,
+        patientId: patientId,
+        note: `First Stage created for patient ID: ${patientId}, name: ${patient.fullname}`,
       });
 
       res.status(201).json({
@@ -143,8 +155,19 @@ module.exports = {
       //   include: [{ model: PatientCRM, as: "PatientCRM" }],
       //   transaction,
       // });
+
   
       await transaction.commit();
+      // Log the activity
+      const createdBy = req.user.userId;
+      await CrmActivityLog.create({
+        stage: "First Stage Updated",
+        createdBy,
+        objectType: "FirstStage",
+        objectId: firstStageId,
+        patientId: firstStageData.PatientCRM.patientId, // Assuming PatientCRM is included in firstStageData
+        note: `First Stage updated for patient ID: ${firstStageId}, name: ${firstStageData.PatientCRM.fullname}`,
+      });
       res.status(200).json({
         message: "FirstStage updated successfully.",
         // firstStage: updatedFirstStage,
@@ -167,6 +190,25 @@ module.exports = {
       if (!deleted) {
         return res.status(404).json({ message: "FirstStage record not found" });
       }
+
+      //find patient name
+      const firstStage = await FirstStage.findByPk(id, {
+        include: PatientCRM,
+      });
+      if (!firstStage) {
+        return res.status(404).json({ message: "FirstStage record not found" });
+      }
+
+      // Log the activity
+      const createdBy = req.user.userId;
+      await CrmActivityLog.create({
+        stage: "First Stage Deleted",
+        createdBy,
+        objectType: "FirstStage",
+        objectId: id,
+        patientId: firstStage.PatientCRM.patientId,
+        note: `First Stage deleted for patient ID: ${id}, name: ${firstStage.PatientCRM.fullname}`,
+      });
 
       res
         .status(200)

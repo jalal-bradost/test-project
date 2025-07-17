@@ -5,20 +5,10 @@ module.exports = {
   // Get all today's Appointment records
   getAllAppointments: async (req, res) => {
     try {
-      // Calculate the start and end of today
-      const startOfDay = new Date();
-      startOfDay.setHours(0, 0, 0, 0);
-
-      const endOfDay = new Date();
-      endOfDay.setHours(23, 59, 59, 999);
+      
 
       // Query appointments that have appointmentDateTime within today
       const appointments = await AppointmentStage.findAll({
-        where: {
-          appointmentDateTime: {
-            [Op.between]: [startOfDay, endOfDay]
-          }
-        },
         include: {
           model: PatientCRM,
           where: { isActive: true },

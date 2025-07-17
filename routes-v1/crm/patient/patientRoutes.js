@@ -1,4 +1,5 @@
 const router = require("../../../config/express");
+const passport = require("../../../config/passport");
 
 const {
     createPatient,
@@ -9,7 +10,7 @@ const {
   } = require("../../../controllers/crm/patient/patientController");
   
   // Create a new patient
-  router.post("/v1/crm/patient", createPatient);
+  router.post("/v1/crm/patient",passport.authenticate('bearer', { session: false }), createPatient);
   
   // Get all patients
   router.get("/v1/crm/patient", getAllPatients);
@@ -18,9 +19,9 @@ const {
   router.get("/v1/crm/patient/:id", getPatientById);
   
   // Update a patient by ID
-  router.put("/v1/crm/patient", updatePatient);
+  router.put("/v1/crm/patient",passport.authenticate('bearer', { session: false }), updatePatient);
   
   // Delete a patient by ID
-  router.delete("/v1/crm/patient/:id", deletePatient);
+  router.delete("/v1/crm/patient/:id",passport.authenticate('bearer', { session: false }), deletePatient);
   
   module.exports = router;

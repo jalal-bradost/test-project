@@ -1,9 +1,10 @@
-const { AppointmentStage, PatientCRM, PatientCRMStatus,sequelize } = require("../../../models");
+const { AppointmentStage, PatientCRM, PatientCRMStatus,CrmActivityLog,sequelize } = require("../../../models");
 
 module.exports = {
   // Create Appointment
   createAppointment: async (req, res) => {
     try {
+      const createdBy = req.user.userId;
       const { patientId, ...appointmentData } = req.body;
   
       // Check if the patient is already scheduled
@@ -16,10 +17,35 @@ module.exports = {
       //     message: "Patient is already scheduled for an appointment.",
       //   });
       // }
+
+      // Retrieve and update PatientCRM record
+      const patient = await PatientCRM.findByPk(patientId);
+      if (!patient) {
+        return res.status(404).json({
+          message: "Patient record not found. Unable to proceed with DoctorStage creation.",
+        });
+      }
+
+      var statusId= 4;
+
+      // Update the statusId of the PatientCRM record
+      await patient.update({ statusId });
+
+
       // Create Appointment
       const appointment = await AppointmentStage.create({
         patientId,
         ...appointmentData,
+      });
+
+      // Log the activity
+      await CrmActivityLog.create({
+        stage: "Appointment Created",
+        createdBy,
+        objectType: "Appointment",
+        objectId: appointment.appointmentStageId,
+        patientId: patientId,
+        note: `Appointment created for patient ID: ${patientId}, name: ${patient.fullname}`,
       });
   
       res.status(201).json({
@@ -166,8 +192,18 @@ module.exports = {
       //   include: [{ model: PatientCRM, as: "PatientCRM" }],
       //   transaction,
       // });
-  
+      
       await transaction.commit();
+      // Log the activity
+      const createdBy = req.user.userId;
+      await CrmActivityLog.create({
+        stage: "Appointment Updated",
+        createdBy,
+        objectType: "Appointment",
+        objectId: appointmentStageId,
+        patientId: patientId,
+        note: `Appointment updated with ID: ${appointmentStageId}`,
+      });
       res.status(200).json({
         message: "FirstStage updated successfully.",
         // firstStage: updatedFirstStage,
@@ -192,9 +228,93 @@ module.exports = {
         return res.status(404).json({ message: "Appointment record not found" });
       }
 
+      //find patient name
+      const appointment = await AppointmentStage.findByPk(id, {
+        include: PatientCRM,
+      });
+      if (!appointment) {
+        return res.status(404).json({ message: "Appointment record not found" });
+      }
+
+      // Log the activity
+      const createdBy = req.user.userId;
+      await CrmActivityLog.create({
+        stage: "Appointment Deleted",
+        createdBy,
+        objectType: "Appointment",
+        objectId: id,
+        patientId: appointment.patientId,
+        note: `Appointment deleted with ID: ${id}, patient name: ${appointment.PatientCRM.fullname}`,
+      });
+
       res.status(200).json({ message: "Appointment record deleted successfully" });
     } catch (error) {
       res.status(500).json({ error: error.message });
+    }
+  },
+
+  // marke appointment as attended
+  markAppointmentAsAttended: async (req, res) => {
+    const transaction = await sequelize.transaction();
+    try {
+      const { id } = req.params; // Get appointmentStageId from URL parameters
+      const createdBy = req.user.userId; // Get user ID from req.user
+
+      // Find the appointment
+      const appointment = await AppointmentStage.findByPk(id, { transaction });
+
+      if (!appointment) {
+        await transaction.rollback();
+        return res.status(404).json({ message: "Appointment record not found" });
+      }
+
+      // Check if it's already attended to avoid unnecessary updates
+      if (appointment.isAttended) {
+        await transaction.rollback();
+        return res.status(200).json({ message: "Appointment is already marked as attended" });
+      }
+
+      // Update the isAttended field
+      const [updatedCount] = await AppointmentStage.update(
+        { isAttended: true },
+        { where: { appointmentStageId: id }, transaction }
+      );
+
+      if (updatedCount === 0) {
+        await transaction.rollback();
+        return res.status(404).json({ message: "Failed to mark appointment as attended" });
+      }
+
+      // Optionally, update PatientCRM status to reflect 'Attended' or 'Completed'
+      // This depends on your business logic. For example, if statusId 5 means "Attended"
+      // You'd need to know the correct statusId for 'Attended'.
+      const patient = await PatientCRM.findByPk(appointment.patientId, { transaction });
+      if (patient) {
+        // Assuming statusId 5 is 'Attended' or 'Completed' in your PatientCRMStatus table
+        // You might need to fetch this ID dynamically or hardcode if stable.
+        const attendedStatusId = 5; // <--- IMPORTANT: Replace with the actual statusId for 'Attended' in your DB
+        await patient.update({ statusId: attendedStatusId }, { transaction });
+      }
+
+
+      // Log the activity
+      await CrmActivityLog.create({
+        stage: "Appointment Attended",
+        createdBy,
+        objectType: "Appointment",
+        objectId: id,
+        patientId: patient.patientId,
+        note: `Appointment ID: ${id} marked as attended by user ID: ${createdBy}`,
+      }, { transaction });
+
+      await transaction.commit();
+
+      res.status(200).json({ message: "Appointment marked as attended successfully", appointmentId: id });
+
+    } catch (error) {
+      console.error("Error in markAppointmentAsAttended:", error);
+      await transaction.rollback();
+      res.status(500).json({ error: error.message || "Internal server error" });
     }
   },
 };

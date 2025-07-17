@@ -188,6 +188,7 @@ const AppointmentStage = require('./crm/AppointmentStage')(sequelize)
 const ClinicStage = require('./crm/ClinicStage')(sequelize)
 const SocialActivity = require('./crm/SocialActivity')(sequelize)
 const SocialActivityDocuments = require('./crm/SocialActivityDocuments')(sequelize)
+const CrmActivityLog = require('./crm/ActivityLog')(sequelize)
 
 const SurgeryCalendarCRM = require('./crm/surgery-calendar/SurgeryCalendar')(sequelize)
 const SurgeryStatusCRM = require('./crm/surgery-calendar/SurgeryStatus')(sequelize)
@@ -213,6 +214,9 @@ ClinicStage.belongsTo(PatientCRM, { foreignKey: 'patientId' });
 
 SocialActivity.belongsTo(User, { foreignKey: 'createdBy' });
 SocialActivity.belongsTo(User, { foreignKey: 'updatedBy' });
+
+CrmActivityLog.belongsTo(User, { foreignKey: 'createdBy' });
+CrmActivityLog.belongsTo(PatientCRM, { foreignKey: 'patientId' });
 
 //Research
 const PatientFollowUp = require("./research/followup/PatientFollowup")(sequelize);
@@ -1112,4 +1116,5 @@ module.exports = {
     PatientFollowUp,
     FollowUpStage,
     SurgeryTypeResearch,
+    CrmActivityLog
 };

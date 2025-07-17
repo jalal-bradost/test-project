@@ -6,6 +6,7 @@ const {
   PatientCRMReferType,
   PatientCRMReferName,
   PatientCRMProfession,
+  CrmActivityLog,
 } = require("../../../models");
 
 module.exports = {
@@ -36,9 +37,21 @@ module.exports = {
       patientData.referNameId = referNameRecord.referNameId;
       patientData.professionId = professionRecord.professionId;
       patientData.addressId = addressRecord.addressId;
+      patientData.statusId = 1;
   
       // Create the Patient record in PatientCRM
       const patient = await PatientCRM.create(patientData);
+
+      // Log the activity
+      const createdBy = req.user.userId;
+      await CrmActivityLog.create({
+        stage: "Patient Created", 
+        createdBy,
+        objectType: "PatientCRM",
+        objectId: patient.patientId,
+        patientId: patient.patientId,
+        note: `Patient created with ID: ${patient.patientId}, name: ${patient.fullname}`,
+      });
   
       res.status(201).json({ message: "Patient created successfully", patient });
     } catch (error) {
@@ -142,6 +155,18 @@ module.exports = {
       }
 
       const updatedPatient = await PatientCRM.findByPk(patientId);
+
+
+      // Log the activity
+      const createdBy = req.user.userId;
+      await CrmActivityLog.create({
+        stage: "Patient Updated",
+        createdBy,
+        objectType: "PatientCRM",
+        objectId: updatedPatient.patientId,
+        patientId: updatedPatient.patientId,
+        note: `Patient updated with ID: ${updatedPatient.patientId}, name: ${updatedPatient.fullname}`,
+      });
       res
         .status(200)
         .json({ message: "Patient updated successfully", updatedPatient });
@@ -165,6 +190,17 @@ module.exports = {
 
       // Update the patient's isActive to false to deactivate (soft delete)
       patient.isActive = false;
+
+      // Log the activity
+      const createdBy = req.user.userId;
+      await CrmActivityLog.create({
+        stage: "Patient Deactivated",
+        createdBy,
+        objectType: "PatientCRM",
+        objectId: patient.patientId,
+        patientId: patient.patientId,
+        note: `Patient deactivated with ID: ${patient.patientId}, name: ${patient.fullname}`,
+      }); 
       await patient.save();
 
       res.status(200).json({ message: "Patient deactivated successfully" });

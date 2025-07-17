@@ -75,6 +75,16 @@ const createSocialActivityDocument = async (req, res) => {
             createdDocuments.push(newSocialActivityDocument);
         }
 
+        // Log the activity
+        const createdBy = req.user.userId;
+        await CrmActivityLog.create({
+            stage: "Social Activity Document Created",
+            createdBy,
+            objectType: "SocialActivityDocument",
+            objectId: socialActivityId,
+            note: `Social Activity document created for activity ID: ${socialActivityId}, description: ${documentDescription}`,
+        });
+
         res.status(201).json({
             message: "Social activity documents uploaded successfully.",
             documents: createdDocuments,
@@ -118,6 +128,16 @@ const deleteSocialActivityDocument = async (req, res) => {
         // Delete the record from the database
         await SocialActivityDocuments.destroy({
             where: { socialActivityId, documentId },
+        });
+
+        // Log the activity
+        const createdBy = req.user.userId;
+        await CrmActivityLog.create({
+            stage: "Social Activity Document Deleted",
+            createdBy,
+            objectType: "SocialActivityDocument",
+            objectId: socialActivityId,
+            note: `Social Activity document deleted for activity ID: ${socialActivityId}, document ID: ${documentId}`,
         });
   
         res.json({ message: "Social activity document deleted successfully" });
