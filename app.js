@@ -206,3 +206,7 @@ require('./routes-v1/crm/activity-log/crmActivityLogRoutes')
 require('./routes-v1/research/followup/patientFollowupRoutes')
 require('./routes-v1/research/followup/followupStageRoutes')
 require('./routes-v1/research/followup/surgeryTypeResearchRoutes')
+
+
+// patient routes
+require('./routes-v1/patient/patient/patientRoutes')
