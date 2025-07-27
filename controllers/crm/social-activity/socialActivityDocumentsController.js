@@ -1,4 +1,4 @@
-const { SocialActivityDocuments, SocialActivity } = require("../../../models");
+const { SocialActivityDocuments,CrmActivityLog, SocialActivity } = require("../../../models");
 const { uploadSocialActivityDocumentImage } = require("../../../services/storageService");
 const fs = require("fs").promises;
 const path = require("path");

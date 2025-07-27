@@ -32,6 +32,7 @@ require("./services/backupService")
 
 // general routes
 require("./routes/images")
+require("./routes/documents")
 require("./routes/audios")
 require("./routes/files")
 require("./routes/auth")
@@ -206,3 +207,6 @@ require('./routes-v1/crm/activity-log/crmActivityLogRoutes')
 require('./routes-v1/research/followup/patientFollowupRoutes')
 require('./routes-v1/research/followup/followupStageRoutes')
 require('./routes-v1/research/followup/surgeryTypeResearchRoutes')
+
+// sign routes
+require('./routes-v1/sign/signRoutes')

@@ -223,6 +223,16 @@ const PatientFollowUp = require("./research/followup/PatientFollowup")(sequelize
 const FollowUpStage = require("./research/followup/FollowupStage")(sequelize);
 const SurgeryTypeResearch = require("./research/followup/SurgeryTypeResearch")(sequelize);
 
+// Sign
+const SignTemplate = require("./sign/SignTemplate")(sequelize);
+const SignDocument = require("./sign/SignDocuments")(sequelize);
+const DocumentCounter = require("./sign/DocumentCounter")(sequelize);
+
+SignDocument.belongsTo(SignTemplate, { foreignKey: 'templateId', as: 'template' });
+SignTemplate.hasMany(SignDocument, { foreignKey: 'templateId', as: 'documents' });
+
+
+
 PatientFollowUp.hasMany(FollowUpStage, { foreignKey: "patientId", onDelete: "CASCADE", });
 FollowUpStage.belongsTo(PatientFollowUp, { foreignKey: "patientId" });
 
@@ -1116,5 +1126,8 @@ module.exports = {
     PatientFollowUp,
     FollowUpStage,
     SurgeryTypeResearch,
-    CrmActivityLog
+    CrmActivityLog,
+    SignTemplate,
+    SignDocument,
+    DocumentCounter,
 };
