@@ -32,6 +32,7 @@ require("./services/backupService")
 
 // general routes
 require("./routes/images")
+require("./routes/documents")
 require("./routes/audios")
 require("./routes/files")
 require("./routes/auth")
@@ -210,3 +211,7 @@ require('./routes-v1/research/followup/surgeryTypeResearchRoutes')
 
 // patient routes
 require('./routes-v1/patient/patient/patientRoutes')
+
+// sign routes
+require('./routes-v1/sign/signRoutes')
+

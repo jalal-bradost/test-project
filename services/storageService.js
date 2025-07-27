@@ -5,6 +5,7 @@ const TASK_CHAT_DIR = path.join(__dirname, '../', 'audios', 'task-chats')
 const ORDER_CHAT_DIR = path.join(__dirname, '../', 'files', 'order-chats')
 const PATIENT_DOC_DIR = path.join(__dirname, '../', 'images', 'patient-documents');
 const SOCIAL_ACTIVITY_DOC_DIR = path.join(__dirname, '../', 'images', 'social-activity-documents');
+const SIGN_DOC_DIR = path.join(__dirname, '../', 'documents', 'sign-app');
 
 const uploadEmployeeImage = async (name, image) => {
     const fileExtension = image.split(';')[0].split('/')[1]
@@ -132,6 +133,62 @@ const uploadSocialActivityDocumentImage = async (name, fileData) => {
 };
 
 
+// New function for Sign App PDF uploads
+const uploadSignDocument = async (name, fileData) => {
+    const matches = fileData.match(/^data:(\w+\/[\w-+.]+);base64,(.+)$/);
+    if (!matches) {
+        throw new Error('Invalid file data provided.');
+    }
+    const mimeType = matches[1]; // Should be 'application/pdf'
+    const base64Content = matches[2];
+    
+    let extension = mimeType.split('/')[1];
+    if (extension === "pdf") { // Ensure it's a PDF
+        extension = "pdf";
+    } else {
+        throw new Error('Invalid file type for Sign document. Only PDFs are allowed.');
+    }
+    
+    const filename = `${name}.${extension}`;
+    const filepath = path.join(SIGN_DOC_DIR, filename);
+    
+    try {
+        fs.writeFileSync(filepath, base64Content, 'base64');
+        console.log('Sign document uploaded successfully:', filename);
+        // Return the filename. The frontend will construct the URL.
+        return filename; 
+    } catch (e) {
+        console.error('Error in uploading sign document file:', e.message);
+        throw new Error(`Error in uploading sign document file: ${e.message}`);
+    }
+};
+
+// Function to delete a file from the sign documents directory
+const deleteSignDocument = async (filename) => {
+    const filepath = path.join(SIGN_DOC_DIR, filename);
+    try {
+        if (fs.existsSync(filepath)) {
+            fs.unlinkSync(filepath);
+            console.log(`Deleted sign document: ${filename}`);
+            return true;
+        }
+        console.log(`Sign document not found for deletion: ${filename}`);
+        return false;
+    } catch (e) {
+        console.error('Error deleting sign document:', e.message);
+        throw new Error(`Error deleting sign document: ${e.message}`);
+    }
+};
+
+
 module.exports = {
-    uploadEmployeeImage, uploadTaskChatAudio, uploadTaskChatFile, uploadOrderChatAudio, uploadOrderChatFile, uploadPatientDocument, uploadSocialActivityDocumentImage
-}
+    uploadEmployeeImage,
+    uploadTaskChatAudio,
+    uploadTaskChatFile,
+    uploadOrderChatAudio,
+    uploadOrderChatFile,
+    uploadPatientDocument,
+    uploadSocialActivityDocumentImage,
+    uploadSignDocument, // Export the new function
+    deleteSignDocument // Export the new delete function
+};
