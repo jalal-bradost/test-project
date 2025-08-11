@@ -370,7 +370,7 @@ router.put("/:type/product/:barcode/threshold",
             throw new Error('Product is not found')
         }
     }),
-    param("type").isIn(["picu", "icu", "op", "perfusion", "anesthesia", "scrubNurse", "sw", "warehouse", "pharmacy"]),
+    param("type").isIn(["picu", "icu", "op", "perfusion", "anesthesia", "scrubNurse", "sw", "warehouse", "pharmacy", "cardiology"]),
     body("threshold").isInt(),
     returnInCaseOfInvalidation,
     async (req, res) => {
@@ -398,7 +398,7 @@ router.put("/:type/product/:barcode/minimum",
             throw new Error('Product is not found')
         }
     }),
-    param("type").isIn(["picu", "icu", "op", "sw", "perfusion", "anesthesia", "scrubNurse"]),
+    param("type").isIn(["picu", "icu", "op", "sw", "perfusion", "anesthesia", "scrubNurse", "cardiology"]),
     body("minimum").isInt(),
     returnInCaseOfInvalidation,
     async (req, res) => {
@@ -430,7 +430,7 @@ router.put(
         }
         return true;
     }),
-    param("storageId").isIn([7, 8, 9, 10, 11, 17]),
+    param("storageId").isIn([7, 8, 9, 10, 11, 17,29]),
     body("quantity").isInt({min: 1}).withMessage("Quantity must be a positive integer"),
     returnInCaseOfInvalidation,
     async (req, res) => {

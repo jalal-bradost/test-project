@@ -17,7 +17,7 @@ const {randomInRange} = require("../../utils/numberUtils");
 const {orderDepartments, orderStatus, orderTypes} = require("./orderProperties");
 const {notifyOrderCreation, notifyOrderStatusChange} = require("../../services/smsService");
 const IMAGE_DIR = path.join(__dirname, '../', '../', 'images', 'orders');
-const orderPermissions = [permissionMap.icuOrder, permissionMap.picuOrder, permissionMap.opOrder, permissionMap.swOrder, permissionMap.research]
+const orderPermissions = [permissionMap.icuOrder, permissionMap.picuOrder, permissionMap.opOrder, permissionMap.swOrder, permissionMap.research, permissionMap.cardiologyOrder]
 router.post("/department/orders", requirePermissions(orderPermissions), [
     body("departmentId").isInt(),
     body("type").isInt(),
@@ -60,7 +60,7 @@ router.post("/department/orders", requirePermissions(orderPermissions), [
                     return res.status(500).send('Error processing image');
                 }
             }
-            await notifyOrderCreation(req.user, departmentId, type);
+            // await notifyOrderCreation(req.user, departmentId, type);
             res.json({message: "Orders created successfully"});
         });
     } catch (e) {
@@ -290,6 +290,14 @@ router.get("/department/pharmacy/orders", requirePermissions([permissionMap.phar
     departmentId: Object.values(orderDepartments),
     status: [orderStatus.PENDING_DELIVERY, orderStatus.WAITING_FOR_WAREHOUSE, orderStatus.COMPLETED, orderStatus.REJECTED_BY_WAREHOUSE],
     type: orderTypes.DRUG
+}));
+
+router.get("/department/cardiology/orders", requirePermissions([permissionMap.cardiologyOrder]), async (req, res) => returnOrders({
+    req,
+    res,
+    departmentId: 20,
+    status: Object.values(orderStatus),
+    type: Object.values(orderTypes)
 }));
 
 

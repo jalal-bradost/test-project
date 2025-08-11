@@ -4,7 +4,7 @@ const {
     Patient, ICUData, SWData, OPData, ICUOperationType, SWOperationType, OPOperationType,
     PatientPayment, PICUData, PICUOperationType, SurgeryCase, SurgeryPricing, SurgeryType, PicuCase, PicuCaseItem,
     PicuCaseService, PicuCaseTime, PerfusionCase, PerfusionCaseItem, AnesthesiaCaseItem, ScrubNurseCase,
-    ScrubNurseCaseItem, AnesthesiaCase
+    ScrubNurseCaseItem, AnesthesiaCase,CardiologyData
 } = require("../../models");
 const returnInCaseOfInvalidation = require("../../middlware/returnInCaseOfInvalidation");
 const {Op} = require("sequelize");
@@ -75,7 +75,7 @@ router.get("/clinic/patient/:patientId/data",
     async (req, res) => {
         const {patientId} = req.params;
         try {
-            const patient = await Patient.findByPk(patientId, {include: [{model: ICUData}, {model: SWData}, {model: OPData}, {model: PICUData}]});
+            const patient = await Patient.findByPk(patientId, {include: [{model: ICUData}, {model: SWData}, {model: OPData}, {model: PICUData},{model: CardiologyData}]});
             if (!patient) {
                 return res.status(400).json({message: "بوونی نییە"});
             }

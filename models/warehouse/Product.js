@@ -35,6 +35,11 @@ module.exports = (sequelize) => {
             allowNull: false,
             defaultValue: 0,
         },
+        cardiologyThreshold: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+        },
         perfusionThreshold: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -76,6 +81,11 @@ module.exports = (sequelize) => {
             defaultValue: 0,
         },
         opMinimum: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+        },
+        cardiologyMinimum: {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 0,

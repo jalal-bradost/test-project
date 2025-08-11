@@ -37,6 +37,10 @@ const types = [
     {
         key: "pharmacy",
         permission: 26
+    },
+    {
+        key: "cardiology",
+        permission: 60
     }
 ]
 const typeKeys = types.map(type => type.key)

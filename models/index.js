@@ -75,6 +75,8 @@ const IcuCase = require("./icu_v1/IcuCase")(sequelize)
 const IcuCaseItem = require("./icu_v1/IcuCaseItem")(sequelize)
 const SwCase = require("./sw_v1/SwCase")(sequelize)
 const SwCaseItem = require("./sw_v1/SwCaseItem")(sequelize)
+const CardiologyCase = require("./cardiology_v1/CardiologyCase")(sequelize)
+const CardiologyCaseItem = require("./cardiology_v1/CardiologyCaseItem")(sequelize)
 
 // Expense
 const PICUExpense = require("./accountant/expenses/PICUExpense")(sequelize)
@@ -139,6 +141,14 @@ const OPStaff = require("./op/OPStaff")(sequelize)
 const SWOperationType = require("./sw/SWOperationType")(sequelize)
 const SWDataOperationTypeJunction = require("./sw/SWDataOperationTypeJunction")(sequelize)
 const SWData = require("./sw/SWData")(sequelize)
+
+const CardiologyShift = require("./cardiology/CardiologyShift")(sequelize)
+const CardiologyStaff = require("./cardiology/CardiologyStaff")(sequelize)
+
+
+const CardiologyOperationType = require("./cardiology/CardiologyOperationType")(sequelize)
+const CardiologyDataOperationTypeJunction = require("./cardiology/CardiologyDataOperationTypeJunction")(sequelize)
+const CardiologyData = require("./cardiology/CardiologyData")(sequelize)
 
 const OPOperationType = require("./op/OPOperationType")(sequelize)
 const OPDataOperationTypeJunction = require("./op/OPDataOperationTypeJunction")(sequelize)
@@ -482,6 +492,13 @@ SWData.belongsTo(Patient, {
     foreignKey: 'patientId'
 });
 
+Patient.hasMany(CardiologyData, {
+    foreignKey: 'patientId', onDelete: 'RESTRICT'
+});
+CardiologyData.belongsTo(Patient, {
+    foreignKey: 'patientId'
+});
+
 Buy.hasOne(BuyDebt, { foreignKey: 'buyId', onDelete: 'CASCADE' });
 BuyDebt.belongsTo(Buy, { foreignKey: 'buyId' });
 
@@ -639,6 +656,14 @@ SWData.hasOne(PatientPayment, {
     foreignKey: "swId"
 });
 
+PatientPayment.belongsTo(CardiologyData, {
+    foreignKey: "cardiologyId", onDelete: 'RESTRICT'
+});
+
+CardiologyData.hasOne(PatientPayment, {
+    foreignKey: "cardiologyId"
+});
+
 //Children
 Patient.hasMany(ChildrenPatientPayment, {
     foreignKey: "patientId", onDelete: 'RESTRICT'
@@ -680,6 +705,14 @@ SWData.hasOne(ChildrenPatientPayment, {
     foreignKey: "swId"
 });
 
+ChildrenPatientPayment.belongsTo(CardiologyData, {
+    foreignKey: "cardiologyId", onDelete: 'RESTRICT'
+});
+
+CardiologyData.hasOne(ChildrenPatientPayment, {
+    foreignKey: "cardiologyId"
+});
+
 ICUData.belongsToMany(ICUOperationType, {
     through: ICUDataOperationTypeJunction, foreignKey: 'icuId', otherKey: 'icuOperationTypeId', onDelete: 'CASCADE'
 });
@@ -699,6 +732,13 @@ SWData.belongsToMany(SWOperationType, {
 });
 SWOperationType.belongsToMany(SWData, {
     through: SWDataOperationTypeJunction, foreignKey: 'swOperationTypeId', otherKey: 'swId', onDelete: 'RESTRICT'
+});
+
+CardiologyData.belongsToMany(CardiologyOperationType, {
+    through: CardiologyDataOperationTypeJunction, foreignKey: 'cardiologyId', otherKey: 'cardiologyOperationTypeId', onDelete: 'CASCADE'
+});
+CardiologyOperationType.belongsToMany(CardiologyData, {
+    through: CardiologyDataOperationTypeJunction, foreignKey: 'cardiologyOperationTypeId', otherKey: 'cardiologyId', onDelete: 'RESTRICT'
 });
 
 OPData.belongsToMany(OPOperationType, {
@@ -1025,6 +1065,9 @@ module.exports = {
     SWData,
     SWOperationType,
     SWDataOperationTypeJunction,
+    CardiologyData,
+    CardiologyOperationType,
+    CardiologyDataOperationTypeJunction,
     OPOperationType,
     OPDataOperationTypeJunction,
     OPData,
@@ -1040,6 +1083,8 @@ module.exports = {
     OPStaff,
     SWShift,
     SWStaff,
+    CardiologyShift,
+    CardiologyStaff,
     ProductReduction,
     Safe,
     SafeLog,
@@ -1068,6 +1113,8 @@ module.exports = {
     IcuCaseItem,
     SwCase,
     SwCaseItem,
+    CardiologyCase,
+    CardiologyCaseItem,
     PatientPaymentExpense,
     PatientPaymentExpenseTemplate,
     PatientPaymentExpenseCategory,
