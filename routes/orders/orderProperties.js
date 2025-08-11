@@ -7,6 +7,7 @@ const orderDepartments = {
     PERFUSION: 5,
     ANESTHESIA: 6,
     SCRUB_NURSE: 7,
+    CARDIOLOGY: 20,
 }
 
 const orderDepartmentNames = {
@@ -18,6 +19,7 @@ const orderDepartmentNames = {
     5: "PERFUSION",
     6: "ANESTHESIA",
     7: "SCRUB_NURSE",
+    20: "CARDIOLOGY",
 }
 const orderStatus = {
     PENDING_APPROVAL: 0,

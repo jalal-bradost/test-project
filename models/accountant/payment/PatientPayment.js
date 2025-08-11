@@ -29,6 +29,10 @@ module.exports = (sequelize) => {
             type: DataTypes.INTEGER,
             allowNull: true
         },
+        cardiologyId: {
+            type: DataTypes.INTEGER,
+            allowNull: true
+        },
         perfusionCaseId: {
             type: DataTypes.INTEGER,
             allowNull: true
@@ -45,6 +49,10 @@ module.exports = (sequelize) => {
             type: DataTypes.INTEGER,
             allowNull: true
         },
+        // cardiologyCaseId: {
+        //     type: DataTypes.INTEGER,
+        //     allowNull: true
+        // },
         swRoomNumber: {
             type: DataTypes.STRING(255),
             allowNull: true,

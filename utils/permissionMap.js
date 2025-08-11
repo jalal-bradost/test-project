@@ -52,5 +52,12 @@ module.exports = {
     anesthesiaOrder: 50,
     scrubNurseOrder: 51,
     viewSalary: 52,
-    viewEmployeeReports: 53
+    viewEmployeeReports: 53,
+    crm: 54,
+    cardiologyItems: 55,
+    cardiologyStaff: 56,
+    cardiologyOperationTypes: 57,
+    cardiologyAddPatient: 58,
+    cardiologyOrder: 59,
+    cardiologyReduction: 60
 }

@@ -87,6 +87,13 @@ require("./routes/op/products")
 require("./routes/op/opShifts")
 require("./routes/op/opStaff")
 
+// cardioloy routes
+require("./routes/cardiology/cardiologyDatas")
+require("./routes/cardiology/cardiologyOperatonTypes")
+require("./routes/cardiology/cardiologyShifts")
+require("./routes/cardiology/cardiologyStaff")
+require("./routes/cardiology/products")
+
 // clinic routes
 require("./routes/clinic/patients")
 
@@ -152,6 +159,11 @@ require("./routes-v1/orderChatRoutes")
 // icu v1 routes
 require("./routes-v1/icu/icuCaseRoutes")
 require("./routes-v1/icu/icuCaseItemRoutes")
+
+// cardiology v1 routes
+require("./routes-v1/cardiology/cardiologyCaseRoutes")
+require("./routes-v1/cardiology/cardiologyCaseItemRoutes")
+
 
 // picu v1 routes
 require("./routes-v1/picu/picuCaseRoutes")
