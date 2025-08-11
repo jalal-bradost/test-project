@@ -227,3 +227,11 @@ require('./routes-v1/patient/patient/patientRoutes')
 // sign routes
 require('./routes-v1/sign/signRoutes')
 
+// appointment routes
+require('./routes-v1/appointment/appointmentRoutes')
+
+//doctor routes
+require('./routes-v1/appointment/doctor/doctorRoutes')
+
+// purpose routes
+require('./routes-v1/appointment/Purposes/purposeRoutes')

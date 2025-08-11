@@ -204,6 +204,21 @@ const SurgeryCalendarCRM = require('./crm/surgery-calendar/SurgeryCalendar')(seq
 const SurgeryStatusCRM = require('./crm/surgery-calendar/SurgeryStatus')(sequelize)
 const SurgeryTypeCRM = require('./crm/surgery-calendar/SurgeryType')(sequelize)
 
+const Appointment = require("./appointment/Appointment")(sequelize)
+const Doctor = require("./appointment/Doctor")(sequelize)
+const Purpose = require("./appointment/Purpose")(sequelize)
+
+Doctor.hasMany(Appointment, { foreignKey: 'doctorId' });
+Appointment.belongsTo(Doctor, { foreignKey: 'doctorId' });
+
+Purpose.hasMany(Appointment, { foreignKey: 'purposeId' });
+Appointment.belongsTo(Purpose, { foreignKey: 'purposeId' });
+
+Patient.hasMany(Appointment, { foreignKey: 'patientId' });
+Appointment.belongsTo(Patient, { foreignKey: 'patientId' });
+
+
+
 PatientCRM.belongsTo(PatientCRMCity, { foreignKey: "cityId", as: "city" });
 PatientCRM.belongsTo(PatientCRMAddress, { foreignKey: "addressId", as: "address" });
 PatientCRM.belongsTo(PatientCRMReferType, { foreignKey: "referTypeId", as: "refer_type" });
@@ -1177,4 +1192,7 @@ module.exports = {
     SignTemplate,
     SignDocument,
     DocumentCounter,
+    Appointment,
+    Doctor,
+    Purpose,
 };
