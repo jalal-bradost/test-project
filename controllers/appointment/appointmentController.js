@@ -1,4 +1,4 @@
-const { Appointment, Doctor, Purpose, Patient } = require("../../models");
+const { Appointment, Doctor, Purpose, Patient,AppointmentData } = require("../../models");
 
 module.exports = { 
   getAllAppointments: async (req, res) => {
@@ -101,6 +101,7 @@ getAppointmentById: async (req, res) => {
         { model: Doctor },
         { model: Purpose },
         { model: Patient },
+        { model:AppointmentData}
       ],
     });
 
@@ -142,7 +143,8 @@ getAppointmentById: async (req, res) => {
           model: Appointment,
           include: [
             { model: Doctor },  // include related doctor for each appointment
-            { model: Purpose }, // include related purpose for each appointment
+            { model: Purpose }, 
+               { model:AppointmentData}
           ],
         },
       ],
@@ -157,5 +159,44 @@ getAppointmentById: async (req, res) => {
     console.error("Error fetching patient with appointments:", error);
     res.status(500).json({ error: error.message });
   }
+},
+updateAppointmentData: async (req, res) => {
+  try {
+     const { appointmentId, patientID } = req.params;
+     const patientId = patientID; // normalize variable
+ let { items, totalPrice } = req.body;
+    // Find the appointment data
+    let appointmentData = await AppointmentData.findOne({
+      where: { appointmentId },
+    });
+
+    // If not found, create a new record
+    if (!appointmentData) {
+      appointmentData = await AppointmentData.create({
+        appointmentId,
+        patientId: 31,   // optional: include patientId if needed
+        items: [], // start with empty array
+        totalPrice: 0,
+      });
+    }
+
+    // Add timestamp to new items
+    items = items.map((item) => ({
+      ...item,
+      createdAt: new Date(),
+    }));
+
+    // Merge items and update total price
+    appointmentData.items = [...(appointmentData.items || []), ...items];
+    appointmentData.totalPrice += parseFloat(totalPrice);
+    
+    await appointmentData.save();
+
+    res.json({ message: "Appointment data updated successfully", appointmentData });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error occurred" });
+  }
 }
+
 };

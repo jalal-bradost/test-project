@@ -207,6 +207,7 @@ const SurgeryTypeCRM = require('./crm/surgery-calendar/SurgeryType')(sequelize)
 const Appointment = require("./appointment/Appointment")(sequelize)
 const Doctor = require("./appointment/Doctor")(sequelize)
 const Purpose = require("./appointment/Purpose")(sequelize)
+const AppointmentData=require('./appointment/AppointmentData')(sequelize)
 
 Doctor.hasMany(Appointment, { foreignKey: 'doctorId' });
 Appointment.belongsTo(Doctor, { foreignKey: 'doctorId' });
@@ -532,6 +533,23 @@ NetWorth.belongsTo(User, { foreignKey: 'userId' });
 Transfer.belongsTo(Storage, {
     foreignKey: 'toStorageId', as: 'toStorage'
 });
+
+Patient.hasMany(AppointmentData, {
+    foreignKey: "patientId", onDelete: 'RESTRICT'
+})
+
+AppointmentData.belongsTo(Patient, {
+    foreignKey: "patientId"
+});
+
+Appointment.hasOne(AppointmentData, {
+    foreignKey: "appointmentId",
+});
+
+AppointmentData.belongsTo(Appointment, {
+    foreignKey: "appointmentId",
+});
+
 
 Patient.hasMany(ICUData, {
     foreignKey: "patientId", onDelete: 'RESTRICT'
@@ -1195,4 +1213,5 @@ module.exports = {
     Appointment,
     Doctor,
     Purpose,
+    AppointmentData
 };
