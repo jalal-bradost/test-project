@@ -208,7 +208,7 @@ router.put(
         const toProductStorage = await ProductStorage.findAll({
           where: {
             barcode: item.barcode,
-            storageId: 29,
+            storageId: 31,
           },
         });
 
@@ -375,7 +375,7 @@ router.post(
           await ProductStorage.increment(
             { quantity },
             {
-              where: { barcode: selectedProduct.barcode, storageId: 29 },
+              where: { barcode: selectedProduct.barcode, storageId: 31 },
               transaction: t,
             }
           );
@@ -407,7 +407,7 @@ router.post(
           await ProductStorage.increment(
             { quantity },
             {
-              where: { barcode: selectedProduct.barcode, storageId: 29 },
+              where: { barcode: selectedProduct.barcode, storageId: 31 },
               transaction: t,
             }
           );

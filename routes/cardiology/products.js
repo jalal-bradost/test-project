@@ -10,7 +10,7 @@ router.get("/cardiology/products", requirePermissions([permissionMap.surgicalWar
                                                    include: [
                                                        {
                                                            model: ProductStorage,
-                                                           where: {storageId: 29},
+                                                           where: {storageId: 31},
                                                            include: [{model: Storage}]
                                                        }, {model: ProductionCompany}, {model: Category}
                                                    ]
